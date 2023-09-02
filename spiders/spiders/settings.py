@@ -1,3 +1,7 @@
+import os
+from dotenv import find_dotenv, load_dotenv
+dotenv_path = find_dotenv()
+load_dotenv(dotenv_path)
 # Scrapy settings for spiders project
 #
 # For simplicity, this file contains only settings considered important or
@@ -12,7 +16,7 @@ BOT_NAME = "spiders"
 SPIDER_MODULES = ["spiders.spiders"]
 NEWSPIDER_MODULE = "spiders.spiders"
 #Scrapeops Settings Configuration
-SCRAPEOPS_API_KEY = 'd042fe6e-0180-4606-965d-b8e00768e9e2'
+SCRAPEOPS_API_KEY = os.getenv("SCRAPEOPS_API_KEY")
 SCRAPEOPS_FAKE_USER_AGENT_ENABLED = True
 DOWNLOADER_MIDDLEWARES = {
     'spiders.middlewares.ScrapeOpsFakeUserAgentMiddleware': 400,
