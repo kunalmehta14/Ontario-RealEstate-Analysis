@@ -1,4 +1,4 @@
-# Scrapy settings for zillowca project
+# Scrapy settings for spiders project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,23 +7,22 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "zillowca"
+BOT_NAME = "spiders"
 
-SPIDER_MODULES = ["zillowca.spiders"]
-NEWSPIDER_MODULE = "zillowca.spiders"
+SPIDER_MODULES = ["spiders.spiders"]
+NEWSPIDER_MODULE = "spiders.spiders"
 #Scrapeops Settings Configuration
 SCRAPEOPS_API_KEY = 'd042fe6e-0180-4606-965d-b8e00768e9e2'
 SCRAPEOPS_FAKE_USER_AGENT_ENABLED = True
 DOWNLOADER_MIDDLEWARES = {
-    'zillowca.middlewares.ScrapeOpsFakeUserAgentMiddleware': 400,
+    'spiders.middlewares.ScrapeOpsFakeUserAgentMiddleware': 400,
 }
 
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = "zillowca (+http://www.yourdomain.com)"
+#USER_AGENT = "spiders (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -51,13 +50,13 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    "zillowca.middlewares.ZillowcaSpiderMiddleware": 543,
+#    "spiders.middlewares.SpidersSpiderMiddleware": 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    "zillowca.middlewares.ZillowcaDownloaderMiddleware": 543,
+#    "spiders.middlewares.SpidersDownloaderMiddleware": 543,
 #}
 
 # Enable or disable extensions
@@ -69,7 +68,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    "zillowca.pipelines.ZillowcaPipeline": 300,
+#    "spiders.pipelines.SpidersPipeline": 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
