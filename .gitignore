@@ -3,3 +3,4 @@ Scripts
 realtorca
 __pycache__/
 pyvenv.cfg
+test.json
