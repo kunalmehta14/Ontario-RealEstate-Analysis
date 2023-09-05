@@ -5,4 +5,5 @@ __pycache__/
 pyvenv.cfg
 test.json
 .env
+environment.env
 middlewaresold.py

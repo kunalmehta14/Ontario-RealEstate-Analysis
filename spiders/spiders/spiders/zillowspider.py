@@ -3,12 +3,22 @@ import json
 
 class ZillowcaSpider(scrapy.Spider):
   name = 'zillowca'
-  # cities = ['toronto-on', 'waterloo-on', 'guelph-on', 'kitchner-on', 'london-on']
-  start_urls = []
-  def start_requests(self):
-    city = self.city.lower().replace(" ","-")
-    city = f'{city}-on'
-    yield scrapy.Request(f'https://www.zillow.com/{city}/')
+  custom_settings = {
+    'FEEDS': {
+      'test.json': {
+        'format': 'json'
+      }
+    }
+  }
+  
+  def __init__(self, cities=None, *args, **kwargs):
+    super(ZillowcaSpider, self).__init__(*args, **kwargs)
+    urls = []
+    for city in cities:
+      city = city.lower().replace(" ","-").replace("/","-").replace("'","-").replace(".","-").replace("--","-")
+      city = f'{city}-on'
+      urls.append(f'https://www.zillow.com/{city}/')
+    self.start_urls = urls
   
   def parse(self, response):
     data = response.selector.xpath('//script[@id="__NEXT_DATA__"]/text()').get()

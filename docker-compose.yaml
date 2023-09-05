@@ -1,0 +1,28 @@
+version: '3.3'
+
+networks:
+  containerNetwork:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.50.60.0/29
+#MySQL App Configuration
+services:
+  mysql:
+    restart: always
+    container_name: mysql
+    build:
+      context: ./mysqlapp
+      dockerfile: Dockerfile
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: "DataAnalysis"
+      MYSQL_HOST: "mysqlserver"
+    env_file:
+      - environment.env
+    networks:
+      containerNetwork:
+        ipv4_address: 10.50.60.2
+    privileged: true
