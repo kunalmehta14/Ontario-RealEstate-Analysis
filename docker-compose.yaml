@@ -22,6 +22,9 @@ services:
       MYSQL_HOST: "mysqlserver"
     env_file:
       - environment.env
+    volumes:
+      - ./mysqlapp/Database-Configuration.sql:/docker-enterypoint-initdb.d
+      - ./mysqlapp/mysqldb:/var/lib/mysql
     networks:
       containerNetwork:
         ipv4_address: 10.50.60.2
