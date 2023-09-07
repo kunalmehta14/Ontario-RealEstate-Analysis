@@ -2,13 +2,6 @@ import scrapy
 
 class WikiCitySpider(scrapy.Spider):
   name = 'wikicity'
-  custom_settings = {
-    'FEEDS': {
-      'testcity.json': {
-        'format': 'json'
-      }
-    }
-  }
   start_urls = ['https://en.wikipedia.org/wiki/List_of_municipalities_in_Ontario']
   def parse(self, response):
     data = response.xpath('//table[contains(@class, "wikitable")]/tbody/tr')
