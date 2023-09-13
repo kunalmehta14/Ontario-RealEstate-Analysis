@@ -8,3 +8,4 @@ test.json
 environment.env
 middlewaresold.py
 mysqldb
+*.logs

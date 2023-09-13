@@ -3,7 +3,14 @@ import json
 
 class YelpSpider(scrapy.Spider):
   name = 'yelp'
-  start_urls = ['https://www.yelp.com/search?find_desc=&find_loc=London%2C+Ontario']
+  def __init__(self, cities=None, *args, **kwargs):
+    super(YelpSpider, self).__init__(*args, **kwargs)
+    urls = []
+    for city in cities:
+      city = city.replace(" ","+").replace("/","%2F").replace("'","%27").replace(",","%2C")
+      city = f'{city}+Ontario'
+      urls.append(f'https://www.yelp.com/search?find_desc=&find_loc={city}')
+    self.start_urls = urls
   def parse(self, response):
     places_of_interst = []
     data = response.selector.xpath('//script[@data-hypernova-key="yelpfrontend__543172__yelpfrontend__GondolaSearch__dynamic"]/text()').get()

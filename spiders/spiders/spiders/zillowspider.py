@@ -4,13 +4,6 @@ from datetime import datetime
 
 class ZillowcaSpider(scrapy.Spider):
   name = 'zillowca'
-  custom_settings = {
-    'FEEDS': {
-      'test.json': {
-        'format': 'json'
-      }
-    }
-  }
   def __init__(self, cities=None, *args, **kwargs):
     super(ZillowcaSpider, self).__init__(*args, **kwargs)
     urls = []
