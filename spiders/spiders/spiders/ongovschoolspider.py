@@ -14,7 +14,9 @@ class OnGovSchoolSpider(scrapy.Spider):
     super(OnGovSchoolSpider, self).__init__(*args, **kwargs)
     self.start_urls = urls
   def parse(self, response):
-    school_info = response.selector.xpath('//div[@class="content"]/div/text()')
+    school_address = response.selector.xpath('//div[@class="content"]/div/text()')
+    school_name = response.selector.xpath('//h2/text()')
     yield {
-        'item': school_info.get()
+      'name': school_name.get(),
+      'address': school_address.get()
     }
