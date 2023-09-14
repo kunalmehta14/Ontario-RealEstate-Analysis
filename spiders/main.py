@@ -41,6 +41,8 @@ def main():
         list_cities.append(item['cityname'])
     yield runner.crawl(WikiSchoolUrlSpider)
     yield runner.crawl(OnGovSchoolSpider, urls=wikischoolurls_output[0]['urls'])
+    yield runner.crawl(ZillowcaSpider, cities=list_cities)
+    yield runner.crawl(YelpSpider, cities=list_cities)
     reactor.stop()
   crawl()
   reactor.run()

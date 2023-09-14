@@ -1,3 +1,8 @@
+import mysql
+import os
+from dotenv import find_dotenv, load_dotenv
+dotenv_path = find_dotenv()
+load_dotenv(dotenv_path)
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
@@ -8,10 +13,3 @@
 #     def process_item(self, item, spider):
 #         return item
 
-class SpidersPipeline:
-  def __init__(self):
-    self.items = []
-  def process_item(self, item, spider):
-    if spider.name == 'special_spider':
-      self.items.append(item)
-      return item

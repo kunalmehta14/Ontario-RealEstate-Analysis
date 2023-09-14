@@ -33,7 +33,7 @@ class ZillowcaSpider(scrapy.Spider):
         'saleStatus': listing['hdpData']['homeInfo']['homeStatus'],
         'timestamp': timestamp
       }
-      time.sleep(2)
+      time.sleep(1)
     if data['props']['pageProps']['searchPageState']['cat1']['searchList'] != None:
       next_page = data['props']['pageProps']['searchPageState']['cat1']['searchList']['pagination']['nextUrl']
       yield response.follow(f'https://www.zillow.com{next_page}', callback=self.parse)
