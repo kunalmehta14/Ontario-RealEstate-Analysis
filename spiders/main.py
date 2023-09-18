@@ -2,6 +2,7 @@ from spiders.spiders.wikicityspider import WikiCitySpider
 from spiders.spiders.ongovschoolspider import OnGovSecSchoolIdSpider, OnGovElSchoolIdSpider, OnGovSchoolSpider
 from spiders.spiders.zillowspider import ZillowcaSpider
 from spiders.spiders.yelpspider import YelpSpider
+from spiders.spiders.mortgagespider import MortgageRatesSpider
 from spiders.spiders.oncolunispider import OnGovUniListSpider, OnGovUniSpider,  OnGovColListSpider, OnGovColSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
@@ -48,13 +49,14 @@ def main():
     #     pass
     #   else:
     #     list_cities.append(item['cityname'])
+    yield runner.crawl(MortgageRatesSpider)
     # yield runner.crawl(OnGovSecSchoolIdSpider)
     # yield runner.crawl(OnGovElSchoolIdSpider)
     # yield runner.crawl(OnGovSchoolSpider, secSchoolIds=sec_schoolIds_output[0]['schoolIds'], elSchoolIds=el_schoolIds_output[0]['schoolIds'])
     # yield runner.crawl(OnGovUniListSpider)
     # yield runner.crawl(OnGovUniSpider, university_list=universities)
-    yield runner.crawl(OnGovColListSpider)
-    yield runner.crawl(OnGovColSpider, college_list=colleges)
+    # yield runner.crawl(OnGovColListSpider)
+    # yield runner.crawl(OnGovColSpider, college_list=colleges)
     # yield runner.crawl(ZillowcaSpider, cities=list_cities)
     # yield runner.crawl(YelpSpider, cities=list_cities)
     reactor.stop()

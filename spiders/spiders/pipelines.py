@@ -1,4 +1,4 @@
-import mysql
+import mysql.connector
 import os
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
@@ -26,7 +26,53 @@ class MysqlPipeline(object):
     )
     self.curr = self.connection.cursor()
   def process_item(self, item, spider):
-    self.store_db(item)
+    if spider.name == 'wikicity':
+      self.cities_db(item)
+    elif spider.name == 'zillowca':
+      self.zillow_db(item)
+    elif spider.name == 'ongovschool':
+      self.schools_db(item)
+    elif spider.name == 'ongovcol':
+      self.colleges_db(item)
+    elif spider.name == 'ongovuni':
+      self.universities_db(item)
+    elif spider.name == 'mortgagerates':
+      self.mortgage_db(item)
     return item
-  def store_db(self, item):
-    self.curr.execute(""" insert into """)
+  def cities_db(self, item):
+    self.curr.execute(""" insert ignore into CitiesData (CityName, CityType, Division, PopulationLatest, PopulationPrevious, Area) values (%s, %s, %s, %s, %s, %s)""",(
+                      item["cityname"], item["cityType"], item["division"],
+                      item["populationLatest"], item["populationPrevious"], item["area"]
+                      ))
+    self.connection.commit()
+  def zillow_db(self, item):
+    self.curr.execute(""" insert ignore into ZillowListings (Id, Address, CityName, Beds, Baths, Price, ListingLat, ListingLon, ListingType, SaleStatus, timestamp) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",(
+                      item["id"], item["address"], item["city"],item["beds"], item["baths"], 
+                      item["price"], item["lat"], item["lon"], item["listingType"],
+                      item["saleStatus"], item["timestamp"]
+                      ))
+    self.connection.commit()
+  def schools_db(self, item):
+    self.curr.execute(""" insert ignore into SchoolData (Id, SchoolName, SchoolAddress, SchoolLat, SchoolLon, CityName) values (%s, %s, %s, %s, %s, %s)""",(
+                      item["schoolId"], item["schoolName"], item["address"],
+                      item["lat"], item["lon"], item["city"]
+                      ))
+    self.connection.commit()
+  def colleges_db(self, item):
+    self.curr.execute(""" insert ignore into CollegesData (CollegeName, CityName, CollegeAddress, CollegeLat, CollegeLon) values (%s, %s, %s, %s, %s)""",(
+                      item["collegeName"], item["city"], item["address"],
+                      item["lat"], item["lon"]
+                      ))
+    self.connection.commit()
+  def universities_db(self, item):
+    self.curr.execute(""" insert ignore into UniversitiesData (UniversityName, CityName, UniversityAddress, UniversityLat, UniversityLon) values (%s, %s, %s, %s, %s)""",(
+                      item["universityName"], item["city"], item["address"],
+                      item["lat"], item["lon"]
+                      ))
+    self.connection.commit()
+  def mortgage_db(self, item):
+    self.curr.execute(""" insert ignore into MortgageData (LenderName, Variable, SixMonths, OneYear, TwoYears, ThreeYears, FourYears, FiveYears, timestamp) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
+                      item['lender'], item['variable'], item['sixmonth'],
+                      item['oneyear'], item['twoyear'], item['threeyear'],
+                      item['fouryear'], item['fiveyear'], item['timestamp']
+                      ))

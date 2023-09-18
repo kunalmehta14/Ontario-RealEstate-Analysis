@@ -44,8 +44,8 @@ class OnGovSchoolSpider(scrapy.Spider):
     school_lon = location.raw['point']['coordinates'][1]
     school_city = location.raw['address']['locality']
     yield {
-      'schoolid': re.findall('\((\d+)\)', school_name.get())[0],
-      'name': re.sub(r'\((\d+)+\)', '', school_name.get()),
+      'schoolId': re.findall('\((\d+)\)', school_name.get())[0],
+      'schoolName': re.sub(r'\((\d+)+\)', '', school_name.get()),
       'address': school_address.get(),
       'lat': school_lat,
       'lon': school_lon,

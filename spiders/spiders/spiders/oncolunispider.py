@@ -1,5 +1,7 @@
 import scrapy, re, os
 from geopy.geocoders import Bing
+from dotenv import find_dotenv, load_dotenv
+dotenv_path = find_dotenv()
 #This spider gathers the list of universities in Ontario 
 # and the URLs associated with each University.
 class OnGovUniListSpider(scrapy.Spider):
@@ -22,10 +24,16 @@ class OnGovUniSpider(scrapy.Spider):
     self.start_urls = urls
   def parse(self, response):
     uni_name = response.xpath('//h1[@class="template-heading"]/text()').get()
-    location = response.xpath('//a[@class="location-directions offsite-noicon"]/@href').get()
+    coordinates = response.xpath('//a[@class="location-directions offsite-noicon"]/@href').get()
+    coordinates = coordinates.replace("https://www.google.ca/maps/place/","")
+    g = Bing(api_key=os.getenv("BING_MAPS_API"))
+    location = g.reverse(coordinates)
     yield {
-      'name': uni_name,
-      'location': location.replace("https://www.google.ca/maps/place/","")
+      'universityName': uni_name,
+      'city': location.raw['address']['locality'],
+      'address': location.raw['name'],
+      'lat': location.raw['point']['coordinates'][0],
+      'lon': location.raw['point']['coordinates'][1]
     }
 #This spider gathers the list of colleges in Ontario 
 # and the URLs associated with each college.
@@ -41,14 +49,6 @@ class OnGovColListSpider(scrapy.Spider):
 #This spider gets college data
 class OnGovColSpider(scrapy.Spider):
   name = 'ongovcol'
-  custom_settings = {
-    'FEEDS': {
-      'test.json': {
-        'format': 'json'
-      }
-    }
-  }
-#   start_urls = ['https://www.ontariocolleges.ca/en/colleges/algonquin']
   def __init__(self, college_list=None, *args, **kwargs):
     super(OnGovColSpider, self).__init__(*args, **kwargs)
     urls = []
@@ -66,7 +66,7 @@ class OnGovColSpider(scrapy.Spider):
         location = g.geocode(f'{address_line1}, {address_line2}')
         city = location.raw['address']['locality']
         yield {
-          'name': f'{college_name}-{city}',
+          'collegeName': f'{college_name}-{city}',
           'city': city,
           'address': f'{address_line1}, {address_line2}',
           'lat': location.raw['point']['coordinates'][0],

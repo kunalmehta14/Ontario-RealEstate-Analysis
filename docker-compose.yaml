@@ -23,7 +23,7 @@ services:
     env_file:
       - environment.env
     volumes:
-      - ./mysqlapp/Database-Configuration.sql:/docker-enterypoint-initdb.d
+      - ./mysqlapp/sqlscritpts:/docker-entrypoint-initdb.d
       - ./mysqlapp/mysqldb:/var/lib/mysql
     networks:
       containerNetwork:
