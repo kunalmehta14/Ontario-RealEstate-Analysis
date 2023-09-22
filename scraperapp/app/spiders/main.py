@@ -40,16 +40,16 @@ def main():
   runner = CrawlerRunner(settings)
   @defer.inlineCallbacks
   def crawl():
-    # yield runner.crawl(WikiCitySpider)
-    # for item in wikicity_output:
-    #   #This filters the city names appending process as, by default, 
-    #   # the list contains two entries with the name Hamilton. 
-    #   # Zillow only has data for the Hamilton city, not the township.
-    #   if item['cityname'] == 'Hamilton' and item['cityType'] == 'Township':
-    #     pass
-    #   else:
-    #     list_cities.append(item['cityname'])
-    yield runner.crawl(MortgageRatesSpider)
+    yield runner.crawl(WikiCitySpider)
+    for item in wikicity_output:
+      #This filters the city names appending process as, by default, 
+      # the list contains two entries with the name Hamilton. 
+      # Zillow only has data for the Hamilton city, not the township.
+      if item['cityname'] == 'Hamilton' and item['cityType'] == 'Township':
+        pass
+      else:
+        list_cities.append(item['cityname'])
+    # yield runner.crawl(MortgageRatesSpider)
     # yield runner.crawl(OnGovSecSchoolIdSpider)
     # yield runner.crawl(OnGovElSchoolIdSpider)
     # yield runner.crawl(OnGovSchoolSpider, secSchoolIds=sec_schoolIds_output[0]['schoolIds'], elSchoolIds=el_schoolIds_output[0]['schoolIds'])
@@ -58,7 +58,7 @@ def main():
     # yield runner.crawl(OnGovColListSpider)
     # yield runner.crawl(OnGovColSpider, college_list=colleges)
     # yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    # yield runner.crawl(YelpSpider, cities=list_cities)
+    yield runner.crawl(YelpSpider, cities=list_cities)
     reactor.stop()
   crawl()
   reactor.run()

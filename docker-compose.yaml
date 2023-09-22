@@ -29,3 +29,18 @@ services:
       containerNetwork:
         ipv4_address: 10.50.60.2
     privileged: true
+#Scraper App Configuration
+  python:
+      restart: always
+      container_name: scraperapp
+      build:
+        context: ./scraperapp
+        dockerfile: Dockerfile
+      ports:
+        - "8060:22"
+      volumes:
+       - ./pscraperapp/app:/opt/app
+      networks:
+        containerNetwork:
+          ipv4_address: 10.50.60.3
+      privileged: true

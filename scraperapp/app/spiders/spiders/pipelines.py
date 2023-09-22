@@ -38,6 +38,8 @@ class MysqlPipeline(object):
       self.universities_db(item)
     elif spider.name == 'mortgagerates':
       self.mortgage_db(item)
+    elif spider.name == 'yelp':
+      self.yelp_db(item)
     return item
   def cities_db(self, item):
     self.curr.execute(""" insert ignore into CitiesData (CityName, CityType, Division, PopulationLatest, PopulationPrevious, Area) values (%s, %s, %s, %s, %s, %s)""",(
@@ -71,8 +73,16 @@ class MysqlPipeline(object):
                       ))
     self.connection.commit()
   def mortgage_db(self, item):
-    self.curr.execute(""" insert ignore into MortgageData (LenderName, Variable, SixMonths, OneYear, TwoYears, ThreeYears, FourYears, FiveYears, timestamp) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
+    self.curr.execute(""" insert ignore into MortgageData (LenderName, Variable, SixMonths, OneYear, TwoYears, ThreeYears, FourYears, FiveYears, timestamp) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",(
                       item['lender'], item['variable'], item['sixmonth'],
                       item['oneyear'], item['twoyear'], item['threeyear'],
                       item['fouryear'], item['fiveyear'], item['timestamp']
                       ))
+    self.connection.commit()
+  def yelp_db(self, item):
+    self.curr.execute(""" insert ignore into YelpData (Id, BusinessName, Rating, Reviews, BusinessLat, BusinessLon, BusinessAddress, CityName, timestamp) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",(
+                      item["id"], item["bizName"],item["rating"], item["reviewCount"], 
+                      item["lat"], item["lon"], item["address"],
+                      item["city"], item["timestamp"]
+                      ))
+    self.connection.commit()
