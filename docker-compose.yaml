@@ -39,7 +39,7 @@ services:
       ports:
         - "8060:22"
       volumes:
-       - ./pscraperapp/app:/opt/app
+       - ./scraperapp/app:/opt/app
       networks:
         containerNetwork:
           ipv4_address: 10.50.60.3
