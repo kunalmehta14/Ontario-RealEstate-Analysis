@@ -30,7 +30,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'data_collector_env', variable: 'DATA_COLLECTOR_ENV'),
                                 file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
                         sshagent(['data_collector_ssh']) {
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir/scraperapp/app'
                             sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir'
                         }
                     }

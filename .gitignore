@@ -11,3 +11,4 @@ mysqldb/*
 *.logs
 *.drawio
 *.bkp
+Jenkinsfiletemp
