@@ -7,5 +7,5 @@ test.json
 .env
 environment.env
 middlewaresold.py
-mysqldb
+mysqldb/*
 *.logs
