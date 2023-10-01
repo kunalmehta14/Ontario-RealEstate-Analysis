@@ -1,7 +1,6 @@
 from spiders.spiders.wikicityspider import WikiCitySpider
 from spiders.spiders.ongovschoolspider import OnGovSecSchoolIdSpider, OnGovElSchoolIdSpider, OnGovSchoolSpider
 from spiders.spiders.zillowspider import ZillowcaSpider
-from spiders.spiders.yelpspider import YelpSpider
 from spiders.spiders.mortgagespider import MortgageRatesSpider
 from spiders.spiders.oncolunispider import OnGovUniListSpider, OnGovUniSpider,  OnGovColListSpider, OnGovColSpider
 from scrapy.crawler import CrawlerRunner
@@ -58,7 +57,6 @@ def main():
     yield runner.crawl(OnGovColListSpider)
     yield runner.crawl(OnGovColSpider, college_list=colleges)
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    # yield runner.crawl(YelpSpider, cities=list_cities)
     reactor.stop()
   crawl()
   reactor.run()
