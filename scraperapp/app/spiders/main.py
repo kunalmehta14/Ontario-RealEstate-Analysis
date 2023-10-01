@@ -7,9 +7,13 @@ from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
 from twisted.internet import reactor, defer
-from scrapy.utils.project import get_project_settings 
+from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
 import warnings
+import os
+from dotenv import find_dotenv, load_dotenv
+dotenv_path = find_dotenv()
+load_dotenv(dotenv_path)
 
 def main():
   warnings.filterwarnings("ignore")
@@ -32,7 +36,44 @@ def main():
   dispatcher.connect(crawler_results, signal=signals.item_scraped)
   #The settings are required to override the default settings used
   #by the spiders.
-  settings = get_project_settings()
+  settings = {
+    'SCRAPEOPS_API_KEY': os.getenv("SCRAPEOPS_API_KEY"),
+    'SCRAPEOPS_FAKE_USER_AGENT_ENABLED': True,
+    'DOWNLOADER_MIDDLEWARES': {
+        'spiders.middlewares.ScrapeOpsFakeUserAgentMiddleware': 400,
+        'scrapy_fake_useragent.middleware.RetryUserAgentMiddleware': 401,
+        'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+        'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
+      },
+    'HEADERS': {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Cache-Control": "max-age=0",
+    },
+    #Logging Settings
+    'LOG_FILE': './scrapy.logs',
+    'LOGGING_ENABLED': True,
+    'LOGGING_LEVEL': 'Debug',
+    'LOG_STDOUT': True,
+    'LOG_FORMAT': "%(levelname)s: %(message)s",
+    # Obey robots.txt rules
+    'ROBOTSTXT_OBEY': True,
+    # Set settings whose default value is deprecated to a future-proof value
+    'REQUEST_FINGERPRINTER_IMPLEMENTATION': "2.7",
+    # TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
+    'FEED_EXPORT_ENCODING': "utf-8",
+    'ITEM_PIPELINES': {
+      "spiders.pipelines.MysqlPipeline": 100
+    }
+  }
   configure_logging(settings)
   #To add the city names from the city data collected from Wikipedia
   list_cities = []
