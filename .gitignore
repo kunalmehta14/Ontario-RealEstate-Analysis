@@ -9,3 +9,5 @@ environment.env
 middlewaresold.py
 mysqldb/*
 *.logs
+*.drawio
+*.bkp
