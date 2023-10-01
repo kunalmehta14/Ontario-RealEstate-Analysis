@@ -58,7 +58,7 @@ def main():
     yield runner.crawl(OnGovColListSpider)
     yield runner.crawl(OnGovColSpider, college_list=colleges)
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    yield runner.crawl(YelpSpider, cities=list_cities)
+    # yield runner.crawl(YelpSpider, cities=list_cities)
     reactor.stop()
   crawl()
   reactor.run()
