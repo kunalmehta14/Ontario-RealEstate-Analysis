@@ -4,13 +4,6 @@ from datetime import datetime
 
 class ZillowcaSpider(scrapy.Spider):
   name = 'zillowca'
-  custom_settings = {
-    'FEEDS': {
-      'test.json': {
-        'format': 'json'
-      }
-    }
-  }
   def __init__(self, cities=None, *args, **kwargs):
     super(ZillowcaSpider, self).__init__(*args, **kwargs)
     urls = []
@@ -27,19 +20,34 @@ class ZillowcaSpider(scrapy.Spider):
     timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S')
     for listing in listings:
       address = f"{listing['addressStreet']}, {listing['addressCity']}, {listing['addressState']}, {listing['addressZipcode']}"
-      yield {
-        'id': listing['id'],
-        'address': address,
-        'city': listing['addressCity'],
-        'beds': listing['beds'],
-        'baths': listing['baths'],
-        'price': listing['unformattedPrice'],
-        'lat': listing['latLong']['latitude'],
-        'lon': listing['latLong']['longitude'],
-        'listingType': listing['hdpData']['homeInfo']['homeType'],
-        'saleStatus': listing['hdpData']['homeInfo']['homeStatus'],
-        'timestamp': timestamp
-      }
+      try:
+        yield {
+          'id': listing['id'],
+          'address': address,
+          'city': listing['addressCity'],
+          'beds': listing['beds'],
+          'baths': listing['baths'],
+          'price': listing['unformattedPrice'],
+          'lat': listing['latLong']['latitude'],
+          'lon': listing['latLong']['longitude'],
+          'listingType': listing['hdpData']['homeInfo']['homeType'],
+          'saleStatus': listing['hdpData']['homeInfo']['homeStatus'],
+          'timestamp': timestamp
+        }
+      except:
+        yield {
+          'id': listing['id'],
+          'address': address,
+          'city': listing['addressCity'],
+          'beds': 0,
+          'baths': 0,
+          'price': listing['unformattedPrice'],
+          'lat': listing['latLong']['latitude'],
+          'lon': listing['latLong']['longitude'],
+          'listingType': listing['hdpData']['homeInfo']['homeType'],
+          'saleStatus': listing['hdpData']['homeInfo']['homeStatus'],
+          'timestamp': timestamp
+        }
       time.sleep(1)
     if data['props']['pageProps']['searchPageState']['cat1']['searchList'] != None:
       next_page = data['props']['pageProps']['searchPageState']['cat1']['searchList']['pagination']['nextUrl']

@@ -27,5 +27,8 @@ WORKDIR /opt/app
 RUN pip install -r requirements.txt
 #Copy supervisoryd.conf configuration that defines the startup services
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+#Copy the logging script and make it executable
+COPY log.sh /opt/log.sh
+RUN chmod +x /opt/log.sh
 #start startup services when the server starts
 CMD ["/usr/bin/supervisord"]

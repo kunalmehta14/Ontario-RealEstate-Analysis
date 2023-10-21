@@ -2,12 +2,17 @@ USE DataAnalysis;
 
 CREATE TABLE ZillowListings (Id BIGINT NOT NULL, `Address` VARCHAR(300) NOT NULL, 
 CityName VARCHAR(100) NOT NULL, Beds INT, Baths INT, Price INT, ListingLat  FLOAT,
-ListingLon  FLOAT, ListingType VARCHAR(50), SaleStatus VARCHAR(50), timestamp DATETIME NOT NULL, 
+ListingLon  FLOAT, ListingType VARCHAR(50),  
 PRIMARY KEY(Id), FOREIGN KEY (CityName) REFERENCES CitiesData(CityName));
 
 CREATE TABLE YelpData (Id BIGINT NOT NULL, BusinessName VARCHAR(300), 
 Rating FLOAT, Reviews INT, BusinessLat FLOAT NOT NULL, BusinessLon FLOAT NOT NULL, 
 BusinessAddress VARCHAR(10), CityName VARCHAR(100) NOT NULL, timestamp DATETIME NOT NULL, 
+PRIMARY KEY(Id), FOREIGN KEY (CityName) REFERENCES CitiesData(CityName));
+
+CREATE TABLE AirbnbData (Id BIGINT NOT NULL, ListingName VARCHAR(300),
+ListingObjType VARCHAR(20), CityName VARCHAR(100) NOT NULL, ListingLat FLOAT NOT NULL, 
+ListingLon FLOAT NOT NULL, RoomTypeCategory VARCHAR(20),
 PRIMARY KEY(Id), FOREIGN KEY (CityName) REFERENCES CitiesData(CityName));
 
 CREATE TABLE SchoolData (Id BIGINT NOT NULL, SchoolName VARCHAR(100) NOT NULL, 
