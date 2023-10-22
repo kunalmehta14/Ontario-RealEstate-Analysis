@@ -37,11 +37,21 @@ pipeline {
                 }
             }
         }
+        stage('Stop Existing Docker Services'){
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sshagent(['data_collector_ssh']) {
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker stop scraperapp mysql"'
+                    }
+                }
+                
+            }
+        }
         stage('Remove Existing Docker Services'){
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sshagent(['data_collector_ssh']) {
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker rm -f $(docker ps -a -q)"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker rm scraperapp mysql"'
                     }
                 }
                 
