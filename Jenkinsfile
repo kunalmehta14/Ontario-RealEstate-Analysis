@@ -37,6 +37,16 @@ pipeline {
                 }
             }
         }
+        stage('Remove Existing Docker Services'){
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sshagent(['data_collector_ssh']) {
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker rm -f $(docker ps -a -q)"'
+                    }
+                }
+                
+            }
+        }
         stage('Start Docker Services'){
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {

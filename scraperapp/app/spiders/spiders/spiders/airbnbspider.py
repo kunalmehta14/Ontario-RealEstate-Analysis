@@ -22,7 +22,7 @@ class AirbnbSpider(scrapy.Spider):
       stay_search = results['staysSearch']
     except:
       stay_search = results['explore']['sections']['sectionIndependentData']['staysSearch']
-    listings = stay_search['searchResults']
+    listings = stay_search['results']['searchResults']
     timestamp = datetime.now()
     timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S')
     for listing in listings:
