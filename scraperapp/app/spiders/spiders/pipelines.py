@@ -1,5 +1,6 @@
 import mysql.connector
 import os, time
+import datetime
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
@@ -12,6 +13,7 @@ load_dotenv(dotenv_path)
 # class SpidersPipeline:
 #     def process_item(self, item, spider):
 #         return item
+insertdate = datetime.date.today()
 class MysqlPipeline(object):
   def __init__(self):
     self.create_connection()
@@ -54,18 +56,12 @@ class MysqlPipeline(object):
                       item["id"], item["address"], item["city"],item["beds"], item["baths"], 
                       item["lat"], item["lon"], item["listingType"]
                       ))
-    try:
-      self.cursor.execute(""" insert into ZillowListingsAssociations (Id, Price, SaleStatus, timestamp) values (%s, %s, %s, %s)""",(
-                        item["id"], item["price"], item["saleStatus"], item["timestamp"]
-                        ))
-      self.connection.commit()
-    except:
-      self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=0 """)
-      self.cursor.execute(""" insert into ZillowListingsAssociations (Id, Price, SaleStatus, timestamp) values (%s, %s, %s, %s)""",(
-                        item["id"], item["price"], item["saleStatus"], item["timestamp"]
-                        ))
-      self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
-      self.connection.commit()
+    self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=0 """)
+    self.cursor.execute(""" insert ignore into ZillowListingsAssociations (Id, Price, SaleStatus, timestamp) values (%s, %s, %s, %s)""",(
+                      item["id"], item["price"], item["saleStatus"], f'{insertdate}'
+                      ))
+    self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
+    self.connection.commit()
   def schools_db(self, item):
     self.cursor.execute(""" insert ignore into SchoolData (Id, SchoolName, SchoolAddress, SchoolLat, SchoolLon, CityName) values (%s, %s, %s, %s, %s, %s)""",(
                       item["schoolId"], item["schoolName"], item["address"],
@@ -103,16 +99,9 @@ class MysqlPipeline(object):
                       item["id"], item["name"], item["listingObjType"], item["city"],
                       item["lat"], item["lon"], item["roomTypeCategory"]
                       ))
+    self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=0 """)
+    self.cursor.execute(""" INSERT IGNORE INTO AirbnbDataAssociations (Id, Price, timestamp) values (%s, %s, %s) """,(
+                      item["id"], item["price"], f'{insertdate}'
+                      ))
+    self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
     self.connection.commit()
-    try:
-      self.cursor.execute(""" insert into AirbnbDataAssociations (Id, Price, timestamp) values (%s, %s, %s) """,(
-                        item["id"], item["price"], item["timestamp"]
-                        ))
-      self.connection.commit()
-    except:
-      self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=0 """)
-      self.cursor.execute(""" insert into AirbnbDataAssociations (Id, Price, timestamp) values (%s, %s, %s) """,(
-                        item["id"], item["price"], item["timestamp"]
-                        ))
-      self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
-      self.connection.commit()
