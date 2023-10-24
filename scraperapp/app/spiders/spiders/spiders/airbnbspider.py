@@ -37,15 +37,13 @@ class AirbnbSpider(scrapy.Spider):
         'price': listing['pricingQuote']['rate']['amount'],
         'timestamp': timestamp
       }
-    next_pages = None
+    next_page = None
     try:
-      next_pages = stay_search['paginationInfo']['pageCursors']
+      next_page = stay_search['paginationInfo']['nextPageCursor']
     except:
       pass
-    if next_pages != None:
-      for next_page in next_pages:
-        try:
-          time.sleep(3)
-          yield response.follow(f'{returned_url[0]}/homes?cursor={next_page}', callback=self.parse)
-        except:
-          pass
+    if next_page != None:
+      try:
+        yield response.follow(f'{returned_url[0]}/homes?cursor={next_page}', callback=self.parse)
+      except:
+        pass
