@@ -12,7 +12,6 @@ class AirbnbSpider(scrapy.Spider):
     self.start_urls = urls
 
   def parse(self, response):
-    time.sleep(3)
     returned_data = response.selector.xpath('//script[@id="data-deferred-state"]/text()').extract()[0]
     returned_url = response.selector.xpath('//meta[@property="og:url"]/@content').extract()
     updated_data = json.loads(returned_data.replace('\\u00a0', '').replace('\\\\', '').strip())

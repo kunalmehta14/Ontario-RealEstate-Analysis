@@ -40,7 +40,7 @@ class MysqlPipeline(object):
       self.universities_db(item)
     elif spider.name == 'mortgagerates':
       self.mortgage_db(item)
-    elif spider.name == 'yelp':
+    elif spider.name == 'yelpapi':
       self.yelp_db(item)
     elif spider.name == 'airbnblistings':
       self.airbnb_db(item)
@@ -52,7 +52,7 @@ class MysqlPipeline(object):
                       ))
     self.connection.commit()
   def zillow_db(self, item):
-    self.cursor.execute(""" insert ignore into ZillowListings (Id, Address, CityName, Beds, Baths, ListingLat, ListingLon, ListingType) values (%s, %s, %s, %s, %s, %s, %s, %s)""",(
+    self.cursor.execute(""" insert ignore into ZillowListings (Id, Address, CityName, Beds, Baths, ListingCoordinates, ListingType) values (%s, %s, %s, %s, %s, ST_GeomFromText('POINT(%s %s)'), %s)""",(
                       item["id"], item["address"], item["city"],item["beds"], item["baths"], 
                       item["lat"], item["lon"], item["listingType"]
                       ))
@@ -63,19 +63,19 @@ class MysqlPipeline(object):
     self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
     self.connection.commit()
   def schools_db(self, item):
-    self.cursor.execute(""" insert ignore into SchoolData (Id, SchoolName, SchoolAddress, SchoolLat, SchoolLon, CityName) values (%s, %s, %s, %s, %s, %s)""",(
+    self.cursor.execute(""" insert ignore into SchoolData (Id, SchoolName, SchoolAddress, SchoolCoordinates, CityName) values (%s, %s, %s, ST_GeomFromText('POINT(%s %s)'), %s)""",(
                       item["schoolId"], item["schoolName"], item["address"],
                       item["lat"], item["lon"], item["city"]
                       ))
     self.connection.commit()
   def colleges_db(self, item):
-    self.cursor.execute(""" insert ignore into CollegesData (CollegeName, CityName, CollegeAddress, CollegeLat, CollegeLon) values (%s, %s, %s, %s, %s)""",(
+    self.cursor.execute(""" insert ignore into CollegesData (CollegeName, CityName, CollegeAddress, CollegeCoordinates) values (%s, %s, %s, ST_GeomFromText('POINT(%s %s)'))""",(
                       item["collegeName"], item["city"], item["address"],
                       item["lat"], item["lon"]
                       ))
     self.connection.commit()
   def universities_db(self, item):
-    self.cursor.execute(""" insert ignore into UniversitiesData (UniversityName, CityName, UniversityAddress, UniversityLat, UniversityLon) values (%s, %s, %s, %s, %s)""",(
+    self.cursor.execute(""" insert ignore into UniversitiesData (UniversityName, CityName, UniversityAddress, UniversityCoordinates) values (%s, %s, %s, ST_GeomFromText('POINT(%s %s)'))""",(
                       item["universityName"], item["city"], item["address"],
                       item["lat"], item["lon"]
                       ))
@@ -88,14 +88,12 @@ class MysqlPipeline(object):
                       ))
     self.connection.commit()
   def yelp_db(self, item):
-    self.cursor.execute(""" insert ignore into YelpData (Id, BusinessName, Rating, Reviews, BusinessLat, BusinessLon, BusinessAddress, CityName, timestamp) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",(
-                      item["id"], item["bizName"],item["rating"], item["reviewCount"], 
-                      item["lat"], item["lon"], item["address"],
-                      item["city"], item["timestamp"]
+    self.cursor.execute(""" insert ignore into YelpData (Id, BusinessName, Rating, Reviews, BusinessAddress, CityName, BusinessCoordinates) values (%s, %s, %s, %s, %s, %s, ST_GeomFromText('POINT(%s %s)'))""",(
+                      item["id"], item["bizName"],item["rating"], item["reviewCount"], item["address"], item["city"], item["lat"], item["lon"]
                       ))
     self.connection.commit()
   def airbnb_db(self, item):
-    self.cursor.execute("""  insert ignore into AirbnbData (Id, ListingName, ListingObjType, CityName, ListingLat, ListingLon, RoomTypeCategory)  values (%s, %s, %s, %s, %s, %s, %s)""",(
+    self.cursor.execute("""  insert ignore into AirbnbData (Id, ListingName, ListingObjType, CityName, ListingCoordinates, RoomTypeCategory)  values (%s, %s, %s, %s, ST_GeomFromText('POINT(%s %s)'), %s)""",(
                       item["id"], item["name"], item["listingObjType"], item["city"],
                       item["lat"], item["lon"], item["roomTypeCategory"]
                       ))

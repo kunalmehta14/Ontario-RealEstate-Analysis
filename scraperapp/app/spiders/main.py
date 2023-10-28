@@ -3,6 +3,7 @@ from spiders.spiders.ongovschoolspider import OnGovSecSchoolIdSpider, OnGovElSch
 from spiders.spiders.zillowspider import ZillowcaSpider
 from spiders.spiders.mortgagespider import MortgageRatesSpider
 from spiders.spiders.airbnbspider import AirbnbSpider
+from spiders.spiders.yelpapispider import YelpApiSpider
 from spiders.spiders.oncolunispider import OnGovUniListSpider, OnGovUniSpider,  OnGovColListSpider, OnGovColSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
@@ -65,28 +66,28 @@ def main():
     'RETRY_HTTP_CODES': [500, 502, 503, 504, 522, 524, 408, 429, 403],
     'RETRY_PRIORITY_ADJUST': -1,
     'RETRY_EXCEPTIONS': [
-    "twisted.internet.defer.TimeoutError",
-    "twisted.internet.error.TimeoutError",
-    "twisted.internet.error.DNSLookupError",
-    "twisted.internet.error.ConnectionRefusedError",
-    "twisted.internet.error.ConnectionDone",
-    "twisted.internet.error.ConnectError",
-    "twisted.internet.error.ConnectionLost",
-    "twisted.internet.error.TCPTimedOutError",
-    "twisted.web.client.ResponseFailed",
+      "twisted.internet.defer.TimeoutError",
+      "twisted.internet.error.TimeoutError",
+      "twisted.internet.error.DNSLookupError",
+      "twisted.internet.error.ConnectionRefusedError",
+      "twisted.internet.error.ConnectionDone",
+      "twisted.internet.error.ConnectError",
+      "twisted.internet.error.ConnectionLost",
+      "twisted.internet.error.TCPTimedOutError",
+      "twisted.web.client.ResponseFailed",
     # OSError is raised by the HttpCompression middleware when trying to
     # decompress an empty response
-    OSError,
-    "scrapy.core.downloader.handlers.http11.TunnelError",
+      OSError,
+      "scrapy.core.downloader.handlers.http11.TunnelError",
     ],
     #Logging Settings
-    'LOG_FILE': f'/var/log/scrapy.log',
+    # 'LOG_FILE': f'/var/log/scrapy.log',
     'LOGGING_ENABLED': True,
     'LOGGING_LEVEL': 'Debug',
     'LOG_STDOUT': True,
     'LOG_FORMAT': "%(levelname)s: %(message)s",
     # Obey robots.txt rules
-    'ROBOTSTXT_OBEY': True,
+    'ROBOTSTXT_OBEY': False,
     # Set settings whose default value is deprecated to a future-proof value
     'REQUEST_FINGERPRINTER_IMPLEMENTATION': "2.7",
     # TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
@@ -95,7 +96,7 @@ def main():
       "spiders.pipelines.MysqlPipeline": 100
     },
     'COOKIES_ENABLED': False,
-    'DOWNLOAD_DELAY': 3
+    'DOWNLOAD_DELAY': 5
   }
   configure_logging(settings)
   #To add the city names from the city data collected from Wikipedia
@@ -122,6 +123,7 @@ def main():
     yield runner.crawl(OnGovColSpider, college_list=colleges)
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
     yield runner.crawl(AirbnbSpider, cities=list_cities)
+    yield runner.crawl(YelpApiSpider, cities=list_cities)
     reactor.stop()
   crawl()
   reactor.run()
