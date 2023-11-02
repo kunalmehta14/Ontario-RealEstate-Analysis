@@ -81,7 +81,7 @@ def main():
       "scrapy.core.downloader.handlers.http11.TunnelError",
     ],
     #Logging Settings
-    # 'LOG_FILE': f'/var/log/scrapy.log',
+    'LOG_FILE': f'/var/log/scrapy.log',
     'LOGGING_ENABLED': True,
     'LOGGING_LEVEL': 'Debug',
     'LOG_STDOUT': True,
@@ -113,17 +113,18 @@ def main():
         pass
       else:
         list_cities.append(item['cityname'])
-    yield runner.crawl(MortgageRatesSpider)
-    yield runner.crawl(OnGovSecSchoolIdSpider)
-    yield runner.crawl(OnGovElSchoolIdSpider)
-    yield runner.crawl(OnGovSchoolSpider, secSchoolIds=sec_schoolIds_output[0]['schoolIds'], elSchoolIds=el_schoolIds_output[0]['schoolIds'])
-    yield runner.crawl(OnGovUniListSpider)
-    yield runner.crawl(OnGovUniSpider, university_list=universities)
-    yield runner.crawl(OnGovColListSpider)
-    yield runner.crawl(OnGovColSpider, college_list=colleges)
+    #yield runner.crawl(MortgageRatesSpider)
+    #yield runner.crawl(OnGovSecSchoolIdSpider)
+    #yield runner.crawl(OnGovElSchoolIdSpider)
+    #yield runner.crawl(OnGovSchoolSpider, secSchoolIds=sec_schoolIds_output[0]['schoolIds'], elSchoolIds=el_schoolIds_output[0]['schoolIds'])
+    #yield runner.crawl(OnGovUniListSpider)
+    #yield runner.crawl(OnGovUniSpider, university_list=universities)
+    #yield runner.crawl(OnGovColListSpider)
+    #yield runner.crawl(OnGovColSpider, college_list=colleges)
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    yield runner.crawl(AirbnbSpider, cities=list_cities)
-    yield runner.crawl(YelpApiSpider, cities=list_cities)
+    #yield runner.crawl(AirbnbSpider, cities=list_cities)
+    #YelpApiSpider Not ready to use yet.
+    #yield runner.crawl(YelpApiSpider, cities=list_cities)
     reactor.stop()
   crawl()
   reactor.run()

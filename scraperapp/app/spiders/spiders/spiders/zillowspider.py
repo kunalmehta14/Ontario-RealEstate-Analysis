@@ -11,6 +11,8 @@ class ZillowcaSpider(scrapy.Spider):
       city = city.lower().replace(" ","-").replace("/","-").replace("'","-").replace(".","-").replace("–","-").replace("--","-")
       city = f'{city}-on'
       urls.append(f'https://www.zillow.com/{city}/')
+      urls.append(f'https://www.zillow.com/{city}/sold/')
+      urls.append(f'https://www.zillow.com/{city}/rentals/')
     self.start_urls = urls
   def parse(self, response):
     data = response.selector.xpath('//script[@id="__NEXT_DATA__"]/text()').get()

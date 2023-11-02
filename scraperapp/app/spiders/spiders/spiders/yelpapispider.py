@@ -49,10 +49,14 @@ class YelpApiSpider(scrapy.Spider):
               'limit': 40,
               'offset': (self.params['offset'] + 40)
             }
-      if response.status != 400 or params['offset'] < 40:
+      if response.status != 400:
         yield response.follow(url=self.url + '&' + urlencode(params), headers=self.headers, method="GET", dont_filter=True, callback=self.parse)
       elif response.status == 429:
         self.headers = {'Authorization' : os.getenv('YELP_FUSION_API_BEARER_TOKEN_2')} 
-      elif response.status != 400 or params['offset'] > 40 or (response.status == 429 and self.headers == {'Authorization' : os.getenv('YELP_FUSION_API_BEARER_TOKEN_2')}):
+      elif response.status == 429 and self.headers == {'Authorization' : os.getenv('YELP_FUSION_API_BEARER_TOKEN_2')}:
+        self.headers = {'Authorization' : os.getenv('YELP_FUSION_API_BEARER_TOKEN_3')} 
+      elif response.status == 429 and self.headers == {'Authorization' : os.getenv('YELP_FUSION_API_BEARER_TOKEN_3')}:
+        self.headers = {'Authorization' : os.getenv('YELP_FUSION_API_BEARER_TOKEN_4')} 
+      elif response.status != 400 or (response.status == 429 and self.headers == {'Authorization' : os.getenv('YELP_FUSION_API_BEARER_TOKEN_2')}):
         params = None
         return None
