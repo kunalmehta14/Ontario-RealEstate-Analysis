@@ -1,8 +1,16 @@
 USE DataAnalysis;
 
-CREATE TABLE ZillowListings (Id BIGINT NOT NULL, `Address` VARCHAR(300) NOT NULL, 
-CityName VARCHAR(100) NOT NULL, Beds INT, Baths INT, ListingCoordinates POINT NOT NULL, 
-ListingType VARCHAR(50), PRIMARY KEY(Id), FOREIGN KEY (CityName) REFERENCES CitiesData(CityName));
+CREATE TABLE ZillowListings (Id BIGINT NOT NULL, `Address` VARCHAR(300) NOT NULL,
+AddressStreet VARCHAR(300) NOT NULL, CityName VARCHAR(100) NOT NULL, 
+Beds INT, Baths INT, ListingCoordinates POINT NOT NULL, 
+ListingType VARCHAR(50), ListingUrl VARCHAR(2083),
+PRIMARY KEY(Id), FOREIGN KEY (CityName) REFERENCES CitiesData(CityName));
+
+CREATE TABLE RemaxListings (Id VARCHAR(50) NOT NULL,
+AddressStreet VARCHAR(300) NOT NULL, CityName VARCHAR(100) NOT NULL, 
+Beds INT, Baths INT, ListingCoordinates POINT NOT NULL, ListingType VARCHAR(50),
+ListingDate DATETIME, Area INT, ListingUrl VARCHAR(2083),
+PRIMARY KEY(Id), FOREIGN KEY (CityName) REFERENCES CitiesData(CityName));
 
 CREATE TABLE YelpData (Id VARCHAR(50) NOT NULL, BusinessName VARCHAR(300), 
 Rating DECIMAL (1,1), Reviews INT, BusinessAddress VARCHAR(300), 

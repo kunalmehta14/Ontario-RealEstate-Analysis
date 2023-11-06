@@ -11,4 +11,5 @@ mysqlapp/mysqldb/*
 *.logs
 *.drawio
 *.bkp
+*.dtmp
 Jenkinsfiletemp

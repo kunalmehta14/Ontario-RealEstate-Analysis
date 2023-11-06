@@ -16,6 +16,7 @@ import os
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
+from spiders.spiders.remaxspider import RemaxSpider
 
 def main():
   warnings.filterwarnings("ignore")
@@ -62,7 +63,7 @@ def main():
       "Cache-Control": "max-age=0",
     },
     'RETRY_ENABLED': True,
-    'RETRY_TIMES': 20,
+    'RETRY_TIMES': 5,
     'RETRY_HTTP_CODES': [500, 502, 503, 504, 522, 524, 408, 429, 403],
     'RETRY_PRIORITY_ADJUST': -1,
     'RETRY_EXCEPTIONS': [
@@ -107,24 +108,25 @@ def main():
     yield runner.crawl(WikiCitySpider)
     for item in wikicity_output:
       #This filters the city names appending process as, by default, 
-      # the list contains two entries with the name Hamilton. 
-      # Zillow only has data for the Hamilton city, not the township.
+      #the list contains two entries with the name Hamilton. 
+      #Zillow only has data for the Hamilton city, not the township.
       if item['cityname'] == 'Hamilton' and item['cityType'] == 'Township':
         pass
       else:
         list_cities.append(item['cityname'])
-    #yield runner.crawl(MortgageRatesSpider)
-    #yield runner.crawl(OnGovSecSchoolIdSpider)
-    #yield runner.crawl(OnGovElSchoolIdSpider)
-    #yield runner.crawl(OnGovSchoolSpider, secSchoolIds=sec_schoolIds_output[0]['schoolIds'], elSchoolIds=el_schoolIds_output[0]['schoolIds'])
-    #yield runner.crawl(OnGovUniListSpider)
-    #yield runner.crawl(OnGovUniSpider, university_list=universities)
-    #yield runner.crawl(OnGovColListSpider)
-    #yield runner.crawl(OnGovColSpider, college_list=colleges)
+    yield runner.crawl(MortgageRatesSpider)
+    yield runner.crawl(OnGovSecSchoolIdSpider)
+    yield runner.crawl(OnGovElSchoolIdSpider)
+    yield runner.crawl(OnGovSchoolSpider, secSchoolIds=sec_schoolIds_output[0]['schoolIds'], elSchoolIds=el_schoolIds_output[0]['schoolIds'])
+    yield runner.crawl(OnGovUniListSpider)
+    yield runner.crawl(OnGovUniSpider, university_list=universities)
+    yield runner.crawl(OnGovColListSpider)
+    yield runner.crawl(OnGovColSpider, college_list=colleges)
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    #yield runner.crawl(AirbnbSpider, cities=list_cities)
+    yield runner.crawl(AirbnbSpider, cities=list_cities)
     #YelpApiSpider Not ready to use yet.
     #yield runner.crawl(YelpApiSpider, cities=list_cities)
+    yield runner.crawl(RemaxSpider, cities=list_cities)
     reactor.stop()
   crawl()
   reactor.run()

@@ -3,3 +3,6 @@ timestamp DATETIME NOT NULL, PRIMARY KEY(Id, timestamp), FOREIGN KEY (Id) REFERE
 
 CREATE TABLE AirbnbDataAssociations (Id BIGINT NOT NULL, Price INT,
 timestamp DATETIME NOT NULL, PRIMARY KEY(Id, timestamp), FOREIGN KEY (Id) REFERENCES AirbnbData(Id));
+
+CREATE TABLE RemaxListingsAssociations (Id VARCHAR(50) NOT NULL, Price INT, SaleStatus VARCHAR(50),
+timestamp DATETIME NOT NULL, PRIMARY KEY(Id, timestamp), FOREIGN KEY (Id) REFERENCES RemaxListings(Id));
