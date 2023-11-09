@@ -1,5 +1,5 @@
 import mysql.connector
-import os, time
+import os
 import datetime
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
@@ -117,6 +117,10 @@ class MysqlPipeline(object):
                         values (%s, %s, %s, %s, %s, %s, ST_GeomFromText('POINT(%s %s)'))""",(
                         item["id"], item["bizName"],item["rating"], item["reviewCount"], 
                         item["address"], item["city"], item["lat"], item["lon"]
+                      ))
+    self.cursor.execute(""" insert ignore into YelpBusinessData (Id, Categories, PriceRange, BusinessUrl) 
+                        values (%s, %s, %s, %s)""",(
+                        item["id"], item['categories'], item['price'], item['url']
                       ))
     self.connection.commit()
   def airbnb_db(self, item):

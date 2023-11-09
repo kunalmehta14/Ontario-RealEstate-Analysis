@@ -124,8 +124,9 @@ def main():
     yield runner.crawl(OnGovColSpider, college_list=colleges)
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
     yield runner.crawl(AirbnbSpider, cities=list_cities)
-    #YelpApiSpider Not ready to use yet.
-    #yield runner.crawl(YelpApiSpider, cities=list_cities)
+    # Note: Yelp doesn't allow web scraping, so to overcome that
+    # Yelp Fusion API is used in form of Spider function
+    yield runner.crawl(YelpApiSpider, cities=list_cities)
     yield runner.crawl(RemaxSpider, cities=list_cities)
     reactor.stop()
   crawl()
