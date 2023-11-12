@@ -1,8 +1,9 @@
 import os
 import mysql.connector
 from geopy.geocoders import Bing
-from dotenv import find_dotenv
+from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
+load_dotenv(dotenv_path)
 
 #When scraping Yelp Data, the cities names sometimes won't match the city, municipality and township names
 #collected using Wikipedia. To fix the citynames, this script can be used.

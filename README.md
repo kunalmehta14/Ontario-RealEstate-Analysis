@@ -32,7 +32,7 @@
 ##### Crawler Architecture:
 ![System Architecture](datacrawler_architecture.svg)
 
-### Setting up the Ontario Real Estaate Data Pipeline
+### Setting up the Ontario Real Estate Data Pipeline
 > Follow the steps below to setup the Docker container environment:
 > + Clone this repository to your local machine:
 ````

@@ -4,6 +4,7 @@ from spiders.spiders.zillowspider import ZillowcaSpider
 from spiders.spiders.mortgagespider import MortgageRatesSpider
 from spiders.spiders.airbnbspider import AirbnbSpider
 from spiders.spiders.yelpapispider import YelpApiSpider
+from spiders.spiders.walkscorespider import WalkScoreZillowSpider, WalkScoreRemaxSpider
 from spiders.spiders.oncolunispider import OnGovUniListSpider, OnGovUniSpider,  OnGovColListSpider, OnGovColSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
@@ -13,6 +14,7 @@ from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
 import warnings
 import os
+import mysql.connector
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
@@ -99,7 +101,20 @@ def main():
     'COOKIES_ENABLED': False,
     'DOWNLOAD_DELAY': 5
   }
+
+  #MySQL Connection To Query Data for location coordinates
+  conn = mysql.connector.connect(
+    host = os.getenv("MYSQL_HOST"),
+    user = os.getenv("MYSQL_USER"),
+    password = os.getenv("MYSQL_PASSWORD"),
+    database = 'DataAnalysis',
+    port = '3306')
+  cursor = conn.cursor(buffered=True , dictionary=True)
   configure_logging(settings)
+  zillow_coordinates_query = ''' SELECT ZillowListings.Id, ST_X(ZillowListings.ListingCoordinates) 
+                            AS lon, ST_Y(ZillowListings.ListingCoordinates) AS lat FROM ZillowListings '''
+  remax_coordinates_query = ''' SELECT Remaxistings.Id, ST_X(RemaxListings.ListingCoordinates) 
+                            AS lon, ST_Y(RemaxListings.ListingCoordinates) AS lat FROM RemaxListings '''
   #To add the city names from the city data collected from Wikipedia
   list_cities = []
   runner = CrawlerRunner(settings)
@@ -107,9 +122,9 @@ def main():
   def crawl():    
     yield runner.crawl(WikiCitySpider)
     for item in wikicity_output:
-      #This filters the city names appending process as, by default, 
-      #the list contains two entries with the name Hamilton. 
-      #Zillow only has data for the Hamilton city, not the township.
+      # This filters the city names and append them to the list_cities array. 
+      # By default the list contains two entries with the name "Hamilton". 
+      # Zillow and Remax only has data for the Hamilton city, not the township.
       if item['cityname'] == 'Hamilton' and item['cityType'] == 'Township':
         pass
       else:
@@ -128,6 +143,16 @@ def main():
     # Yelp Fusion API is used in form of Spider function
     yield runner.crawl(YelpApiSpider, cities=list_cities)
     yield runner.crawl(RemaxSpider, cities=list_cities)
+    # Queries the DB to get the coordinates for all the Zillow Listings
+    cursor.execute(zillow_coordinates_query)
+    zillow_coordinates = cursor.fetchall()
+    #Get's the Walkscore for the Zillow Listings
+    yield runner.crawl(WalkScoreZillowSpider, listings_coordinates=zillow_coordinates)
+    # # Queries the DB to get the coordinates for all the Remax Listings
+    cursor.execute(remax_coordinates_query)
+    remax_coordinates = cursor.fetchall()
+    # #Get's the Walkscore for the Remax Listings
+    yield runner.crawl(WalkScoreRemaxSpider, listings_coordinates=remax_coordinates)
     reactor.stop()
   crawl()
   reactor.run()
