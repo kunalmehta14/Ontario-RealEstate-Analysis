@@ -143,19 +143,19 @@ def main():
     yield runner.crawl(OnGovColSpider, college_list=colleges)
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
     yield runner.crawl(AirbnbSpider, cities=list_cities)
-    # Note: Yelp doesn't allow web scraping, so to overcome that
-    # Yelp Fusion API is used in form of Spider function
+    #Note: Yelp doesn't allow web scraping, so to overcome that
+    #Yelp Fusion API is used in form of Spider function
     yield runner.crawl(YelpApiSpider, cities=list_cities)
     yield runner.crawl(RemaxSpider, cities=list_cities)
-    # Queries the DB to get the coordinates for all the Zillow Listings
+    #Queries the DB to get the coordinates for all the Zillow Listings
     cursor.execute(zillow_coordinates_query)
     zillow_coordinates = cursor.fetchall()
     #Get's the Walkscore for the Zillow Listings
     yield runner.crawl(WalkScoreZillowSpider, listings_coordinates=zillow_coordinates)
-    # # Queries the DB to get the coordinates for all the Remax Listings
+    #Queries the DB to get the coordinates for all the Remax Listings
     cursor.execute(remax_coordinates_query)
     remax_coordinates = cursor.fetchall()
-    # #Get's the Walkscore for the Remax Listings
+    #Get's the Walkscore for the Remax Listings
     yield runner.crawl(WalkScoreRemaxSpider, listings_coordinates=remax_coordinates)
     reactor.stop()
   crawl()

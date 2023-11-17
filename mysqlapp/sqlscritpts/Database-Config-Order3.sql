@@ -62,7 +62,7 @@ Distance DECIMAL(4,2) NOT NULL, PRIMARY KEY(Id, UniversityName),
 FOREIGN KEY (Id) REFERENCES RemaxListings(Id), 
 FOREIGN KEY (UniversityName) REFERENCES UniversitiesData(UniversityName));
 
-CREATE TABLE RemaxListingsAirbnb (Id BIGINT NOT NULL, AirbnbId BIGINT NOT NULL,
+CREATE TABLE RemaxListingsAirbnb (Id VARCHAR(50) NOT NULL, AirbnbId BIGINT NOT NULL,
 Distance DECIMAL(4,2) NOT NULL, PRIMARY KEY(Id,  AirbnbId), 
 FOREIGN KEY (Id) REFERENCES RemaxListings(Id), 
 FOREIGN KEY (AirbnbId) REFERENCES AirbnbData(Id));
