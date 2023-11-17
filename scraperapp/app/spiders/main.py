@@ -111,10 +111,14 @@ def main():
     port = '3306')
   cursor = conn.cursor(buffered=True , dictionary=True)
   configure_logging(settings)
-  zillow_coordinates_query = ''' SELECT ZillowListings.Id, ST_X(ZillowListings.ListingCoordinates) 
-                            AS lon, ST_Y(ZillowListings.ListingCoordinates) AS lat FROM ZillowListings '''
-  remax_coordinates_query = ''' SELECT Remaxistings.Id, ST_X(RemaxListings.ListingCoordinates) 
-                            AS lon, ST_Y(RemaxListings.ListingCoordinates) AS lat FROM RemaxListings '''
+  zillow_coordinates_query = ''' SELECT ZillowListings.Id, ST_X(ZillowListings.ListingCoordinates) AS lon, 
+                                ST_Y(ZillowListings.ListingCoordinates) AS lat FROM ZillowListings WHERE NOT EXISTS 
+                                (SELECT * FROM ZillowListingsWalkscore WHERE 
+                                ZillowListingsWalkscore.Id = ZillowListings.Id) '''
+  remax_coordinates_query = ''' SELECT RemaxListings.Id, ST_X(RemaxListings.ListingCoordinates) AS lon, 
+                                ST_Y(RemaxListings.ListingCoordinates) AS lat FROM RemaxListings WHERE NOT EXISTS 
+                                (SELECT * FROM RemaxListingsWalkscore WHERE 
+                                RemaxListingsWalkscore.Id = RemaxListings.Id) '''
   #To add the city names from the city data collected from Wikipedia
   list_cities = []
   runner = CrawlerRunner(settings)
