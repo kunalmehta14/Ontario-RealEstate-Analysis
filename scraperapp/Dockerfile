@@ -13,7 +13,7 @@ RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
 RUN apt install python3-pip -y
 # Create App Directory
 RUN mkdir /opt/app
-RUN chown administrator:root /opt/app
+# RUN chown administrator:root /opt/app
 COPY ./app/requirements.txt /opt/app/requirements.txt
 WORKDIR /opt/app
 RUN pip install -r requirements.txt

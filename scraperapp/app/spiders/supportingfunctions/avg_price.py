@@ -5,8 +5,12 @@ dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
 #Global Logging Configuration
-logging.basicConfig(filename='/var/log/avgprice-calculator.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='/var/log/avgprice-calculator.log', 
+                    encoding='utf-8', level=logging.DEBUG)
 
+# This function maintains the average
+# listing price of each city in the
+# given province.
 def city_avg_price_calculator():
   try:
     conn = mysql.connector.connect(
