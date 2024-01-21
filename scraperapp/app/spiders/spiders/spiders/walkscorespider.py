@@ -61,6 +61,6 @@ class WalkScoreRemaxSpider(scrapy.Spider):
     listing_id = re.search(r'id=(.*)', response.request.url)
     yield {
       'id': listing_id.group(1),
-      'walk': int(walkscore),
-      'transit': int(transitscore)
+      'walk': walkscore,
+      'transit': transitscore
     }

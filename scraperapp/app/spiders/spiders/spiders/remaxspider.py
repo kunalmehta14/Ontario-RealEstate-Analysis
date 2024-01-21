@@ -6,7 +6,7 @@ dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
 class RemaxSpider(scrapy.Spider):
-    name = 'remax'
+    name = 'remaxca'
     def __init__(self, cities=None, *args, **kwargs):
       super(RemaxSpider, self).__init__(*args, **kwargs)
       urls = []
@@ -29,9 +29,10 @@ class RemaxSpider(scrapy.Spider):
         #what is the status associated with that listingid.
         listing_type = None
         for type in listing_type_ids:
-          if str(listing['listingTypeId']) == type:
-            listing_type = listing_type_ids.get(type)
-          else:
+          try:
+            if str(listing['listingTypeId']) == type:
+              listing_type = listing_type_ids.get(type)
+          except:
             pass
         #Some listings don't have any beds, baths or sqft key
         #Update those key with a custom entry for consistency
@@ -67,8 +68,8 @@ class RemaxSpider(scrapy.Spider):
           listing_lon = location.raw['point']['coordinates'][1]
         #Strip date from the listed date-time
         #Convert it into MySQL accepted date object
-        datetime_obj = datetime.strptime(listing['listingDate'], "%Y-%m-%dT%H:%M:%SZ")
-        listing_date = datetime_obj.strftime("%Y-%m-%d")
+        # datetime_obj = datetime.strptime(listing['listingDate'], "%Y-%m-%d")
+        # listing_date = datetime_obj.strftime("%Y-%m-%d")
         #Create listing url by mergin the url returned
         #in the collected data and url used in the response
         listing_url = f"https://www.remax.ca/{listing['detailUrl']}"
@@ -83,7 +84,7 @@ class RemaxSpider(scrapy.Spider):
             'lon': listing_lon,
             'listingType': listing_type,
             'saleStatus': listing['status'],
-            'listingDate': listing_date,
+            'listingDate': listing['listingDate'],
             'sqft': listing_sqft,
             'listingUrl': listing_url,
             'timestamp': timestamp

@@ -1,7 +1,8 @@
 import mysql.connector
-import os
+import os, re
 import datetime
 from dotenv import find_dotenv, load_dotenv
+from scrapy.pipelines.files import FilesPipeline
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
@@ -15,8 +16,8 @@ class MysqlPipeline(object):
       host = os.getenv("MYSQL_HOST"),
       user = os.getenv("MYSQL_USER"),
       password = os.getenv("MYSQL_PASSWORD"),
-      database = 'DataAnalysis',
-      port = '3306'
+      database = os.getenv("MYSQL_DATABASE"),
+      port = os.getenv("MYSQL_PORT")
     )
     self.cursor = self.connection.cursor()
   def process_item(self, item, spider):
@@ -24,7 +25,7 @@ class MysqlPipeline(object):
       self.cities_db(item)
     elif spider.name == 'zillowca':
       self.zillow_db(item)
-    elif spider.name == 'remax':
+    elif spider.name == 'remaxca':
       self.remax_db(item)
     elif spider.name == 'ongovschool':
       self.schools_db(item)
@@ -152,3 +153,8 @@ class MysqlPipeline(object):
                         item["id"], item["walk"], item["transit"]
                       ))
     self.connection.commit()
+
+class DownloadFilePipelines(FilesPipeline):
+  def file_path(self, request, response=None, info=None, *, item=None):
+    print(f"Title returned: {item.get('Title')}")
+    return item.get('Title')

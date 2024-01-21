@@ -1,15 +1,22 @@
+# Python venv folders
 Lib
 Scripts
-realtorca
 __pycache__/
 pyvenv.cfg
-test.json
+# env files
 .env
 environment.env
-middlewaresold.py
-mysqlapp/mysqldb/*
+# Mysql Directory for
+# devlopment purposes
+mysqlapp/
+docker-compose-dev.yaml
+*.xls
+# Ignore Log Files
 *.logs
+# Ignore Drawio Files
 *.drawio
 *.bkp
 *.dtmp
+# Jenkins temporary
+# configuration files
 Jenkinsfiletemp
