@@ -100,7 +100,8 @@ def main_walkscore():
     user = os.getenv("MYSQL_USER"),
     password = os.getenv("MYSQL_PASSWORD"),
     database = os.getenv("MYSQL_DATABASE"),
-    port = os.getenv("MYSQL_PORT"))
+    port = os.getenv("MYSQL_PORT"),
+    auth_plugin='mysql_native_password')
   cursor = conn.cursor(buffered=True , dictionary=True)
   configure_logging(settings)
   zillow_coordinates_query = ''' SELECT ZillowListings.Id, ST_X(ZillowListings.ListingCoordinates) AS lon, 

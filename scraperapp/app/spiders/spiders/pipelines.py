@@ -17,7 +17,8 @@ class MysqlPipeline(object):
       user = os.getenv("MYSQL_USER"),
       password = os.getenv("MYSQL_PASSWORD"),
       database = os.getenv("MYSQL_DATABASE"),
-      port = os.getenv("MYSQL_PORT")
+      port = os.getenv("MYSQL_PORT"),
+      auth_plugin='mysql_native_password'
     )
     self.cursor = self.connection.cursor()
   def process_item(self, item, spider):

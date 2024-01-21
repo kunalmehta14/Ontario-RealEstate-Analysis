@@ -16,8 +16,6 @@ services:
       build:
         context: ./scraperapp
         dockerfile: Dockerfile
-      ports:
-        - "8060:22"
       volumes:
        - ./scraperapp/app:/opt/app
       networks:

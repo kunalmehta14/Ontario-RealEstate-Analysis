@@ -2,26 +2,22 @@ from spiders.spiders.wikicityspider import WikiCitySpider
 from spiders.spiders.ongovschoolspider import OnGovSecSchoolIdSpider, OnGovElSchoolIdSpider, OnGovSchoolSpider
 from spiders.spiders.zillowspider import ZillowcaSpider
 from spiders.spiders.remaxspider import RemaxSpider
-from spiders.spiders.remaxdetailspider import RemaxDetailSpider
 from spiders.spiders.mortgagespider import MortgageRatesSpider
 from spiders.spiders.airbnbspider import AirbnbSpider
 from spiders.spiders.yelpapispider import YelpApiSpider
 from spiders.spiders.oncolunispider import OnGovUniListSpider, OnGovUniSpider,  OnGovColListSpider, OnGovColSpider
-from spiders.spiders.cbadataspider import CbaSpider, CbaxlsSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
 from twisted.internet import reactor, defer
 from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
-import warnings
-import os
-import mysql.connector
+import warnings, os
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
-# from supportingfunctions.avg_price import city_avg_price_calculator
-# from supportingfunctions.yelp_data_cleaner_script import data_cleaner
+from supportingfunctions.avg_price import city_avg_price_calculator
+from supportingfunctions.yelp_data_cleaner_script import data_cleaner
 
 def main():
   warnings.filterwarnings("ignore")
@@ -30,7 +26,7 @@ def main():
   el_schoolIds_output = []
   universities = []
   colleges = []
-  cba_data = []
+
   def crawler_results(item, spider):
     if spider.name == 'wikicity':
       wikicity_output.append(item)
@@ -42,8 +38,7 @@ def main():
       universities.append(item['university'])
     elif spider.name == 'ongovcollist':
       colleges.append(item['college'])
-    elif spider.name == 'Cbaspider':
-      cba_data.append(item)
+
   dispatcher.connect(crawler_results, signal=signals.item_scraped)
   #The settings are required to override the default settings used
   #by the spiders.
@@ -90,7 +85,7 @@ def main():
       "scrapy.core.downloader.handlers.http11.TunnelError",
     ],
     #Logging Settings
-    # 'LOG_FILE': f'/var/log/scrapy.log',
+    'LOG_FILE': f'/var/log/scrapy.log',
     'LOGGING_ENABLED': True,
     'LOGGING_LEVEL': 'Debug',
     'LOG_STDOUT': True,
@@ -107,55 +102,40 @@ def main():
     'COOKIES_ENABLED': False,
     'DOWNLOAD_DELAY': 5
   }
-
-  #MySQL Connection To Query Data for location coordinates
-  conn = mysql.connector.connect(
-    host = os.getenv("MYSQL_HOST"),
-    user = os.getenv("MYSQL_USER"),
-    password = os.getenv("MYSQL_PASSWORD"),
-    database = os.getenv("MYSQL_DATABASE"),
-    port = os.getenv("MYSQL_PORT"))
-  cursor = conn.cursor(buffered=True , dictionary=True)
   configure_logging(settings)
   #To add the city names from the city data collected from Wikipedia
   list_cities = []
   runner = CrawlerRunner(settings)
   @defer.inlineCallbacks
   def crawl():    
-    # yield runner.crawl(WikiCitySpider)
-    # for item in wikicity_output:
-    #   # This filters the city names and append them to the list_cities array. 
-    #   # By default the list contains two entries with the name "Hamilton". 
-    #   # Zillow and Remax only has data for the Hamilton city, not the township.
-    #   if item['cityname'] == 'Hamilton' and item['cityType'] == 'Township':
-    #     pass
-    #   else:
-    #     list_cities.append(item['cityname'])
-    # yield runner.crawl(MortgageRatesSpider)
-    # yield runner.crawl(OnGovSecSchoolIdSpider)
-    # yield runner.crawl(OnGovElSchoolIdSpider)
-    # yield runner.crawl(OnGovSchoolSpider, secSchoolIds=sec_schoolIds_output[0]['schoolIds'], elSchoolIds=el_schoolIds_output[0]['schoolIds'])
-    # yield runner.crawl(OnGovUniListSpider)
-    # yield runner.crawl(RemaxDetailSpider)
-    # yield runner.crawl(OnGovUniSpider, university_list=universities)
-    # yield runner.crawl(OnGovColListSpider)
-    # yield runner.crawl(OnGovColSpider, college_list=colleges)
-    # yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    # yield runner.crawl(AirbnbSpider, cities=list_cities)
-    # #Note: Yelp doesn't allow web scraping, so to overcome that
-    # #Yelp Fusion API is used in form of Spider function
-    # yield runner.crawl(YelpApiSpider, cities=list_cities)
-    # yield runner.crawl(RemaxSpider, cities=list_cities)
-
-    yield runner.crawl(CbaSpider)
-    app_directory = os.getcwd()
-    # app_directory = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-    mortgage_arrerars_path = app_directory + '/downloaded_files/mortgage-arrears/' + cba_data[0]['files'][0]['path']
-    mortgage_arrerars_data = CbaxlsSpider(mortgage_arrerars_path, 'ON')
-    mortgage_arrerars_data.read_xls()
+    yield runner.crawl(WikiCitySpider)
+    for item in wikicity_output:
+      # This filters the city names and append them to the list_cities array. 
+      # By default the list contains two entries with the name "Hamilton". 
+      # Zillow and Remax only has data for the Hamilton city, not the township.
+      if item['cityname'] == 'Hamilton' and item['cityType'] == 'Township':
+        pass
+      else:
+        list_cities.append(item['cityname'])
+    yield runner.crawl(MortgageRatesSpider)
+    yield runner.crawl(OnGovSecSchoolIdSpider)
+    yield runner.crawl(OnGovElSchoolIdSpider)
+    yield runner.crawl(OnGovSchoolSpider, 
+                       secSchoolIds=sec_schoolIds_output[0]['schoolIds'], 
+                       elSchoolIds=el_schoolIds_output[0]['schoolIds'])
+    yield runner.crawl(OnGovUniListSpider)
+    yield runner.crawl(OnGovUniSpider, university_list=universities)
+    yield runner.crawl(OnGovColListSpider)
+    yield runner.crawl(OnGovColSpider, college_list=colleges)
+    yield runner.crawl(ZillowcaSpider, cities=list_cities)
+    yield runner.crawl(AirbnbSpider, cities=list_cities)
+    #Note: Yelp doesn't allow web scraping, so to overcome that
+    #Yelp Fusion API is used in form of Spider function
+    yield runner.crawl(YelpApiSpider, cities=list_cities)
+    yield runner.crawl(RemaxSpider, cities=list_cities)
     reactor.stop()
-    # data_cleaner()
-    # city_avg_price_calculator()
+    data_cleaner()
+    city_avg_price_calculator()
   crawl()
   reactor.run()
   
