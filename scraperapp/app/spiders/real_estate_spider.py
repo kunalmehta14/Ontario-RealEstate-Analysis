@@ -1,19 +1,30 @@
-from spiders.spiders.walkscorespider import WalkScoreZillowSpider, WalkScoreRemaxSpider
+from spiders.spiders.wikicityspider import WikiCitySpider
+from spiders.spiders.zillowspider import ZillowcaSpider
+from spiders.spiders.remaxspider import RemaxSpider
+from spiders.spiders.mortgagespider import MortgageRatesSpider
+from spiders.spiders.airbnbspider import AirbnbSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
 from twisted.internet import reactor, defer
 from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
-import warnings
-import os
-import mysql.connector
+import warnings, os
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
+from supportingfunctions.avg_price import city_avg_price_calculator
+from supportingfunctions.yelp_data_cleaner_script import data_cleaner
 
-def main_walkscore():
+def real_estate_spider():
   warnings.filterwarnings("ignore")
+  wikicity_output = []
+
+  def crawler_results(item, spider):
+    if spider.name == 'wikicity':
+      wikicity_output.append(item)
+
+  dispatcher.connect(crawler_results, signal=signals.item_scraped)
   #The settings are required to override the default settings used
   #by the spiders.
   settings = {
@@ -76,41 +87,29 @@ def main_walkscore():
     'COOKIES_ENABLED': False,
     'DOWNLOAD_DELAY': 5
   }
-
-  #MySQL Connection To Query Data for location coordinates
-  conn = mysql.connector.connect(
-    host = os.getenv("MYSQL_HOST"),
-    user = os.getenv("MYSQL_USER"),
-    password = os.getenv("MYSQL_PASSWORD"),
-    database = os.getenv("MYSQL_DATABASE"),
-    port = os.getenv("MYSQL_PORT"),
-    auth_plugin='mysql_native_password')
-  cursor = conn.cursor(buffered=True , dictionary=True)
   configure_logging(settings)
-  zillow_coordinates_query = ''' SELECT ZillowListings.Id, ST_X(ZillowListings.ListingCoordinates) AS lon, 
-                                ST_Y(ZillowListings.ListingCoordinates) AS lat FROM ZillowListings WHERE NOT EXISTS 
-                                (SELECT * FROM ZillowListingsWalkscore WHERE 
-                                ZillowListingsWalkscore.Id = ZillowListings.Id) '''
-  remax_coordinates_query = ''' SELECT RemaxListings.Id, ST_X(RemaxListings.ListingCoordinates) AS lon, 
-                                ST_Y(RemaxListings.ListingCoordinates) AS lat FROM RemaxListings WHERE NOT EXISTS 
-                                (SELECT * FROM RemaxListingsWalkscore WHERE 
-                                RemaxListingsWalkscore.Id = RemaxListings.Id) '''
+  #To add the city names from the city data collected from Wikipedia
+  list_cities = []
   runner = CrawlerRunner(settings)
   @defer.inlineCallbacks
-  def crawl():
-    #Queries the DB to get the coordinates for all the Remax Listings
-    cursor.execute(remax_coordinates_query)
-    remax_coordinates = cursor.fetchall()
-    #Get's the Walkscore for the Remax Listings
-    yield runner.crawl(WalkScoreRemaxSpider, listings_coordinates=remax_coordinates)
-    #Queries the DB to get the coordinates for all the Zillow Listings
-    cursor.execute(zillow_coordinates_query)
-    zillow_coordinates = cursor.fetchall()
-    #Get's the Walkscore for the Zillow Listings
-    yield runner.crawl(WalkScoreZillowSpider, listings_coordinates=zillow_coordinates)
+  def crawl():    
+    yield runner.crawl(WikiCitySpider)
+    for item in wikicity_output:
+      # This filters the city names and append them to the list_cities array. 
+      # By default the list contains two entries with the name "Hamilton". 
+      # Zillow and Remax only has data for the Hamilton city, not the township.
+      if item['cityname'] == 'Hamilton' and item['cityType'] == 'Township':
+        pass
+      else:
+        list_cities.append(item['cityname'])
+    yield runner.crawl(MortgageRatesSpider)
+    yield runner.crawl(ZillowcaSpider, cities=list_cities)
+    yield runner.crawl(AirbnbSpider, cities=list_cities)
+    yield runner.crawl(RemaxSpider, cities=list_cities)
     reactor.stop()
+    city_avg_price_calculator()
   crawl()
   reactor.run()
-
+  
 if __name__ == '__main__':
-  main_walkscore()
+  real_estate_spider()

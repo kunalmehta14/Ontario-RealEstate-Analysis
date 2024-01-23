@@ -1,9 +1,5 @@
 from spiders.spiders.wikicityspider import WikiCitySpider
 from spiders.spiders.ongovschoolspider import OnGovSecSchoolIdSpider, OnGovElSchoolIdSpider, OnGovSchoolSpider
-from spiders.spiders.zillowspider import ZillowcaSpider
-from spiders.spiders.remaxspider import RemaxSpider
-from spiders.spiders.mortgagespider import MortgageRatesSpider
-from spiders.spiders.airbnbspider import AirbnbSpider
 from spiders.spiders.yelpapispider import YelpApiSpider
 from spiders.spiders.oncolunispider import OnGovUniListSpider, OnGovUniSpider,  OnGovColListSpider, OnGovColSpider
 from scrapy.crawler import CrawlerRunner
@@ -16,10 +12,9 @@ import warnings, os
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
-from supportingfunctions.avg_price import city_avg_price_calculator
 from supportingfunctions.yelp_data_cleaner_script import data_cleaner
 
-def main():
+def amenties_spider():
   warnings.filterwarnings("ignore")
   wikicity_output = []
   sec_schoolIds_output = []
@@ -30,14 +25,6 @@ def main():
   def crawler_results(item, spider):
     if spider.name == 'wikicity':
       wikicity_output.append(item)
-    elif spider.name == 'ongovsecschoolid':
-      sec_schoolIds_output.append(item)
-    elif spider.name == 'ongovelschoolid':
-      el_schoolIds_output.append(item)
-    elif spider.name == 'ongovunilist':
-      universities.append(item['university'])
-    elif spider.name == 'ongovcollist':
-      colleges.append(item['college'])
 
   dispatcher.connect(crawler_results, signal=signals.item_scraped)
   #The settings are required to override the default settings used
@@ -117,7 +104,6 @@ def main():
         pass
       else:
         list_cities.append(item['cityname'])
-    yield runner.crawl(MortgageRatesSpider)
     yield runner.crawl(OnGovSecSchoolIdSpider)
     yield runner.crawl(OnGovElSchoolIdSpider)
     yield runner.crawl(OnGovSchoolSpider, 
@@ -127,17 +113,13 @@ def main():
     yield runner.crawl(OnGovUniSpider, university_list=universities)
     yield runner.crawl(OnGovColListSpider)
     yield runner.crawl(OnGovColSpider, college_list=colleges)
-    yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    yield runner.crawl(AirbnbSpider, cities=list_cities)
     #Note: Yelp doesn't allow web scraping, so to overcome that
     #Yelp Fusion API is used in form of Spider function
     yield runner.crawl(YelpApiSpider, cities=list_cities)
-    yield runner.crawl(RemaxSpider, cities=list_cities)
     reactor.stop()
     data_cleaner()
-    city_avg_price_calculator()
   crawl()
   reactor.run()
   
 if __name__ == '__main__':
-  main()
+  amenties_spider()

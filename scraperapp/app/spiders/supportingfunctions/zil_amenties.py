@@ -18,81 +18,69 @@ def zillow_amenties_calculator():
       user = os.getenv("MYSQL_USER"),
       password = os.getenv("MYSQL_PASSWORD"),
       database = os.getenv("MYSQL_DATABASE"),
-      port = os.getenv("MYSQL_PORT"))
+      port = os.getenv("MYSQL_PORT"),
+      auth_plugin='mysql_native_password')
     cursor = conn.cursor(buffered=True , dictionary=True)
     logging.info(f'Connection to {os.getenv("MYSQL_HOST")} server was successful')
   except Exception as e:
     logging.error(e)
   #Retrieve Zillow Listings
-  try:
-    zillow_query = ''' SELECT ZillowListings.Id, ZillowListings.CityName,
-                      ZillowListingsWalkscore.WalkScore, ZillowListingsWalkscore.TransitScore,
-                      ST_X(ZillowListings.ListingCoordinates) AS lon, 
-                      ST_Y(ZillowListings.ListingCoordinates) AS lat
-                      FROM ZillowListings
-                      INNER JOIN ZillowListingsWalkscore ON 
-                      ZillowListings.Id = ZillowListingsWalkscore.Id  
-                      WHERE ZillowListingsWalkscore.WalkScore IS NOT NULL
-                      AND NOT EXISTS (SELECT * FROM ZillowListingsAirbnb WHERE 
-                      ZillowListingsAirbnb.Id = ZillowListings.Id)
-                      AND NOT EXISTS (SELECT * FROM ZillowListingsAmeneties WHERE 
-                      ZillowListingsAmeneties.Id = ZillowListings.Id)
-                      AND NOT EXISTS (SELECT * FROM ZillowListingsColleges WHERE 
-                      ZillowListingsColleges.Id = ZillowListings.Id)
-                      AND NOT EXISTS (SELECT * FROM ZillowListingsSchools WHERE 
-                      ZillowListingsSchools.Id = ZillowListings.Id)
-                      AND NOT EXISTS (SELECT * FROM ZillowListingsUniversities WHERE 
-                      ZillowListingsUniversities.Id = ZillowListings.Id) '''
-    cursor.execute(zillow_query)
-    zillow_results_set = cursor.fetchall()
-    logging.info(f'Zillow listings query returned {len(zillow_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  zillow_query = ''' SELECT ZillowListings.Id, ZillowListings.CityName,
+                    ZillowListingsWalkscore.WalkScore, ZillowListingsWalkscore.TransitScore,
+                    ST_X(ZillowListings.ListingCoordinates) AS lon, 
+                    ST_Y(ZillowListings.ListingCoordinates) AS lat
+                    FROM ZillowListings
+                    INNER JOIN ZillowListingsWalkscore ON 
+                    ZillowListings.Id = ZillowListingsWalkscore.Id  
+                    WHERE ZillowListingsWalkscore.WalkScore IS NOT NULL
+                    AND NOT EXISTS (SELECT * FROM ZillowListingsAirbnb WHERE 
+                    ZillowListingsAirbnb.Id = ZillowListings.Id)
+                    AND NOT EXISTS (SELECT * FROM ZillowListingsAmeneties WHERE 
+                    ZillowListingsAmeneties.Id = ZillowListings.Id)
+                    AND NOT EXISTS (SELECT * FROM ZillowListingsColleges WHERE 
+                    ZillowListingsColleges.Id = ZillowListings.Id)
+                    AND NOT EXISTS (SELECT * FROM ZillowListingsSchools WHERE 
+                    ZillowListingsSchools.Id = ZillowListings.Id)
+                    AND NOT EXISTS (SELECT * FROM ZillowListingsUniversities WHERE 
+                    ZillowListingsUniversities.Id = ZillowListings.Id) '''
+  cursor.execute(zillow_query)
+  zillow_results_set = cursor.fetchall()
+  logging.info(f'Zillow listings query returned {len(zillow_results_set)} results.')
+
   #Retrieve College Data
-  try:
-    college_query = ''' SELECT CollegesData.CollegeName, CollegesData.CityName, ST_X(CollegesData.CollegeCoordinates) AS lon, 
-                        ST_Y(CollegesData.CollegeCoordinates) AS lat FROM CollegesData '''
-    cursor.execute(college_query)
-    colleges_results_set = cursor.fetchall()
-    logging.info(f'Colleges query returned {len(colleges_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  college_query = ''' SELECT CollegesData.CollegeName, CollegesData.CityName, ST_X(CollegesData.CollegeCoordinates) AS lon, 
+                      ST_Y(CollegesData.CollegeCoordinates) AS lat FROM CollegesData '''
+  cursor.execute(college_query)
+  colleges_results_set = cursor.fetchall()
+  logging.info(f'Colleges query returned {len(colleges_results_set)} results.')
+
   #Retrieve University Data
-  try:
-    university_query = ''' SELECT UniversitiesData.UniversityName, UniversitiesData.CityName, ST_X(UniversitiesData.UniversityCoordinates) AS lon, 
-                        ST_Y(UniversitiesData.UniversityCoordinates) AS lat FROM UniversitiesData '''
-    cursor.execute(university_query)
-    universities_results_set = cursor.fetchall()
-    logging.info(f'Universities query returned {len(universities_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  university_query = ''' SELECT UniversitiesData.UniversityName, UniversitiesData.CityName, ST_X(UniversitiesData.UniversityCoordinates) AS lon, 
+                      ST_Y(UniversitiesData.UniversityCoordinates) AS lat FROM UniversitiesData '''
+  cursor.execute(university_query)
+  universities_results_set = cursor.fetchall()
+  logging.info(f'Universities query returned {len(universities_results_set)} results.')
+
   #Retrieve School Data
-  try:
-    school_query = ''' SELECT SchoolData.Id, SchoolData.CityName, ST_X(SchoolData.SchoolCoordinates) AS lon, 
-                        ST_Y(SchoolData.SchoolCoordinates) AS lat FROM SchoolData '''
-    cursor.execute(school_query)
-    school_results_set = cursor.fetchall()
-    logging.info(f'School query returned {len(school_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  school_query = ''' SELECT SchoolData.Id, SchoolData.CityName, ST_X(SchoolData.SchoolCoordinates) AS lon, 
+                      ST_Y(SchoolData.SchoolCoordinates) AS lat FROM SchoolData '''
+  cursor.execute(school_query)
+  school_results_set = cursor.fetchall()
+  logging.info(f'School query returned {len(school_results_set)} results.')
+
   #Retrieve Yelp Data
-  try:
-    yelp_query = ''' SELECT YelpData.Id, YelpData.CityName, ST_X(YelpData.BusinessCoordinates) AS lon, 
-                    ST_Y(YelpData.BusinessCoordinates) AS lat FROM YelpData'''
-    cursor.execute(yelp_query)
-    yelp_results_set = cursor.fetchall()
-    logging.info(f'Yelp query returned {len(yelp_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  yelp_query = ''' SELECT YelpData.Id, YelpData.CityName, ST_X(YelpData.BusinessCoordinates) AS lon, 
+                  ST_Y(YelpData.BusinessCoordinates) AS lat FROM YelpData'''
+  cursor.execute(yelp_query)
+  yelp_results_set = cursor.fetchall()
+  logging.info(f'Yelp query returned {len(yelp_results_set)} results.')
+
   #Retrieve Airbnb Data
-  try:
-    airbnb_query = ''' SELECT AirbnbData.Id, AirbnbData.CityName, ST_X(AirbnbData.ListingCoordinates) AS lon, 
-                    ST_Y(AirbnbData.ListingCoordinates) AS lat FROM AirbnbData'''
-    cursor.execute(airbnb_query)
-    airbnb_results_set = cursor.fetchall()
-    logging.info(f'Airbnb query returned {len(yelp_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  airbnb_query = ''' SELECT AirbnbData.Id, AirbnbData.CityName, ST_X(AirbnbData.ListingCoordinates) AS lon, 
+                  ST_Y(AirbnbData.ListingCoordinates) AS lat FROM AirbnbData'''
+  cursor.execute(airbnb_query)
+  airbnb_results_set = cursor.fetchall()
+  logging.info(f'Airbnb query returned {len(yelp_results_set)} results.')
 
   #Process Colleges Location Data
   def college_data(zillow_id, college_name, dist):

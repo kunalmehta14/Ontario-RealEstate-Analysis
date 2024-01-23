@@ -18,81 +18,69 @@ def remax_amenties_calculator():
       user = os.getenv("MYSQL_USER"),
       password = os.getenv("MYSQL_PASSWORD"),
       database = os.getenv("MYSQL_DATABASE"),
-      port = os.getenv("MYSQL_PORT"))
+      port = os.getenv("MYSQL_PORT"),
+      auth_plugin='mysql_native_password')
     cursor = conn.cursor(buffered=True , dictionary=True)
     logging.info(f'Connection to {os.getenv("MYSQL_HOST")} server was successful')
   except Exception as e:
     logging.error(e)
   #Retrieve Remax Listings
-  try:
-    remax_query = ''' SELECT RemaxListings.Id, RemaxListings.CityName,
-                      RemaxListingsWalkscore.WalkScore, RemaxListingsWalkscore.TransitScore,
-                      ST_X(RemaxListings.ListingCoordinates) AS lon, 
-                      ST_Y(RemaxListings.ListingCoordinates) AS lat
-                      FROM RemaxListings
-                      INNER JOIN RemaxListingsWalkscore ON 
-                      RemaxListings.Id = RemaxListingsWalkscore.Id  
-                      WHERE RemaxListingsWalkscore.WalkScore IS NOT NULL
-                      AND NOT EXISTS (SELECT * FROM RemaxListingsAirbnb WHERE 
-                      RemaxListingsAirbnb.Id = RemaxListings.Id)
-                      AND NOT EXISTS (SELECT * FROM RemaxListingsAmeneties WHERE 
-                      RemaxListingsAmeneties.Id = RemaxListings.Id)
-                      AND NOT EXISTS (SELECT * FROM RemaxListingsColleges WHERE 
-                      RemaxListingsColleges.Id = RemaxListings.Id)
-                      AND NOT EXISTS (SELECT * FROM RemaxListingsSchools WHERE 
-                      RemaxListingsSchools.Id = RemaxListings.Id)
-                      AND NOT EXISTS (SELECT * FROM RemaxListingsUniversities WHERE 
-                      RemaxListingsUniversities.Id = RemaxListings.Id) '''
-    cursor.execute(remax_query)
-    remax_results_set = cursor.fetchall()
-    logging.info(f'Remax listings query returned {len(remax_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  remax_query = ''' SELECT RemaxListings.Id, RemaxListings.CityName,
+                    RemaxListingsWalkscore.WalkScore, RemaxListingsWalkscore.TransitScore,
+                    ST_X(RemaxListings.ListingCoordinates) AS lon, 
+                    ST_Y(RemaxListings.ListingCoordinates) AS lat
+                    FROM RemaxListings
+                    INNER JOIN RemaxListingsWalkscore ON 
+                    RemaxListings.Id = RemaxListingsWalkscore.Id  
+                    WHERE RemaxListingsWalkscore.WalkScore IS NOT NULL
+                    AND NOT EXISTS (SELECT * FROM RemaxListingsAirbnb WHERE 
+                    RemaxListingsAirbnb.Id = RemaxListings.Id)
+                    AND NOT EXISTS (SELECT * FROM RemaxListingsAmeneties WHERE 
+                    RemaxListingsAmeneties.Id = RemaxListings.Id)
+                    AND NOT EXISTS (SELECT * FROM RemaxListingsColleges WHERE 
+                    RemaxListingsColleges.Id = RemaxListings.Id)
+                    AND NOT EXISTS (SELECT * FROM RemaxListingsSchools WHERE 
+                    RemaxListingsSchools.Id = RemaxListings.Id)
+                    AND NOT EXISTS (SELECT * FROM RemaxListingsUniversities WHERE 
+                    RemaxListingsUniversities.Id = RemaxListings.Id) '''
+  cursor.execute(remax_query)
+  remax_results_set = cursor.fetchall()
+  logging.info(f'Remax listings query returned {len(remax_results_set)} results.')
+
   #Retrieve College Data
-  try:
-    college_query = ''' SELECT CollegesData.CollegeName, CollegesData.CityName, ST_X(CollegesData.CollegeCoordinates) AS lon, 
-                        ST_Y(CollegesData.CollegeCoordinates) AS lat FROM CollegesData '''
-    cursor.execute(college_query)
-    colleges_results_set = cursor.fetchall()
-    logging.info(f'Colleges query returned {len(colleges_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  college_query = ''' SELECT CollegesData.CollegeName, CollegesData.CityName, ST_X(CollegesData.CollegeCoordinates) AS lon, 
+                      ST_Y(CollegesData.CollegeCoordinates) AS lat FROM CollegesData '''
+  cursor.execute(college_query)
+  colleges_results_set = cursor.fetchall()
+  logging.info(f'Colleges query returned {len(colleges_results_set)} results.')
+
   #Retrieve University Data
-  try:
-    university_query = ''' SELECT UniversitiesData.UniversityName, UniversitiesData.CityName, ST_X(UniversitiesData.UniversityCoordinates) AS lon, 
-                        ST_Y(UniversitiesData.UniversityCoordinates) AS lat FROM UniversitiesData '''
-    cursor.execute(university_query)
-    universities_results_set = cursor.fetchall()
-    logging.info(f'Universities query returned {len(universities_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  university_query = ''' SELECT UniversitiesData.UniversityName, UniversitiesData.CityName, ST_X(UniversitiesData.UniversityCoordinates) AS lon, 
+                      ST_Y(UniversitiesData.UniversityCoordinates) AS lat FROM UniversitiesData '''
+  cursor.execute(university_query)
+  universities_results_set = cursor.fetchall()
+  logging.info(f'Universities query returned {len(universities_results_set)} results.')
+  
   #Retrieve School Data
-  try:
-    school_query = ''' SELECT SchoolData.Id, SchoolData.CityName, ST_X(SchoolData.SchoolCoordinates) AS lon, 
-                        ST_Y(SchoolData.SchoolCoordinates) AS lat FROM SchoolData '''
-    cursor.execute(school_query)
-    school_results_set = cursor.fetchall()
-    logging.info(f'School query returned {len(school_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  school_query = ''' SELECT SchoolData.Id, SchoolData.CityName, ST_X(SchoolData.SchoolCoordinates) AS lon, 
+                      ST_Y(SchoolData.SchoolCoordinates) AS lat FROM SchoolData '''
+  cursor.execute(school_query)
+  school_results_set = cursor.fetchall()
+  logging.info(f'School query returned {len(school_results_set)} results.')
+
   #Retrieve Yelp Data
-  try:
-    yelp_query = ''' SELECT YelpData.Id, YelpData.CityName, ST_X(YelpData.BusinessCoordinates) AS lon, 
-                    ST_Y(YelpData.BusinessCoordinates) AS lat FROM YelpData'''
-    cursor.execute(yelp_query)
-    yelp_results_set = cursor.fetchall()
-    logging.info(f'Yelp query returned {len(yelp_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  yelp_query = ''' SELECT YelpData.Id, YelpData.CityName, ST_X(YelpData.BusinessCoordinates) AS lon, 
+                  ST_Y(YelpData.BusinessCoordinates) AS lat FROM YelpData'''
+  cursor.execute(yelp_query)
+  yelp_results_set = cursor.fetchall()
+  logging.info(f'Yelp query returned {len(yelp_results_set)} results.')
+
   #Retrieve Airbnb Data
-  try:
-    airbnb_query = ''' SELECT AirbnbData.Id, AirbnbData.CityName, ST_X(AirbnbData.ListingCoordinates) AS lon, 
-                    ST_Y(AirbnbData.ListingCoordinates) AS lat FROM AirbnbData'''
-    cursor.execute(airbnb_query)
-    airbnb_results_set = cursor.fetchall()
-    logging.info(f'Airbnb query returned {len(yelp_results_set)} results.')
-  except Exception as e:
-    logging.error(e)
+  airbnb_query = ''' SELECT AirbnbData.Id, AirbnbData.CityName, ST_X(AirbnbData.ListingCoordinates) AS lon, 
+                  ST_Y(AirbnbData.ListingCoordinates) AS lat FROM AirbnbData'''
+  cursor.execute(airbnb_query)
+  airbnb_results_set = cursor.fetchall()
+  logging.info(f'Airbnb query returned {len(yelp_results_set)} results.')
 
   #Process Colleges Location Data
   def college_data(remax_id, college_name, dist):
