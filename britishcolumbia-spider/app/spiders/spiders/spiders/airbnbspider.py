@@ -1,4 +1,4 @@
-import scrapy, json, time
+import scrapy, json
 from datetime import datetime
 
 class AirbnbSpider(scrapy.Spider):

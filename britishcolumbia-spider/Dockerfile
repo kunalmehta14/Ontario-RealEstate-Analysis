@@ -5,7 +5,6 @@ RUN apt update && apt full-upgrade -y
 RUN apt install \
     sudo -y \
     supervisor -y \
-    rsync -y \
     nano
 
 RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata

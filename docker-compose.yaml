@@ -9,18 +9,31 @@ networks:
         - subnet: 10.50.60.0/29
 
 services:
-# Scraper App Configuration
-  scraperapp:
+# Ontario Scraper App Configuration
+  ontario-spider:
       restart: always
-      container_name: scraperapp
+      container_name: ontario-spider
       build:
-        context: ./scraperapp
+        context: ./ontario-spider
         dockerfile: Dockerfile
       volumes:
-       - ./scraperapp/app:/opt/app
+       - ./ontario-spider/app:/opt/app
       networks:
         containerNetwork:
           ipv4_address: 10.50.60.3
+      privileged: true
+# British Columbia Scraper App Configuration
+  britishcolumbia-spider:
+      restart: always
+      container_name: britishcolumbia-spider
+      build:
+        context: ./britishcolumbia-spider
+        dockerfile: Dockerfile
+      volumes:
+        - ./britishcolumbia-spider/app:/opt/app
+      networks:
+        containerNetwork:
+          ipv4_address: 10.50.60.4
       privileged: true
 
 # Monitoring Services
