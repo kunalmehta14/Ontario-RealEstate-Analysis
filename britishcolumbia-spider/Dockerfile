@@ -19,7 +19,7 @@ RUN pip install -r requirements.txt
 #Copy supervisoryd.conf configuration that defines the startup services
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 #Copy the logging script and make it executable
-COPY log.sh /opt/log.sh
-RUN chmod +x /opt/log.sh
+USER root
+RUN ln -sf /proc/1/fd/1 /var/log/scrapy.log
 #start startup services when the server starts
 CMD ["/usr/bin/supervisord"]

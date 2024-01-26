@@ -24,13 +24,26 @@ pipeline {
                 }
             }
         }
-        stage('Copy Environmental Variables'){
+        stage('Copy Environmental Variables Ontario Spider'){
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    withCredentials([file(credentialsId: 'data_collector_env', variable: 'DATA_COLLECTOR_ENV'),
+                    withCredentials([file(credentialsId: 'on_data_collector_env', variable: 'on_data_collector_env'),
                                 file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
                         sshagent(['data_collector_ssh']) {
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir/scraperapp/app'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $on_data_collector_env jenkins@$DATA_COLLECTOR_IP:/opt/appdir/ontario-spider/app'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Copy Environmental Variables British Columbia Spider'){
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withCredentials([file(credentialsId: 'bc_data_collector_env', variable: 'bc_data_collector_env'),
+                                file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
+                        sshagent(['data_collector_ssh']) {
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $bc_data_collector_env jenkins@$DATA_COLLECTOR_IP:/opt/appdir/britishcolumbia-spider/app'
                             sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir'
                         }
                     }
@@ -41,7 +54,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sshagent(['data_collector_ssh']) {
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker stop scraperapp"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker stop ontario-spider britishcolumbia-spider"'
                     }
                 }
                 
@@ -51,7 +64,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sshagent(['data_collector_ssh']) {
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker rm scraperapp"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker rm ontario-spider britishcolumbia-spider"'
                     }
                 }
                 
