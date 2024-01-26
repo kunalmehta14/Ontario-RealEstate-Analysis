@@ -3,13 +3,24 @@ pipeline {
     environment {
         DATA_COLLECTOR_IP = credentials('data_collector_ip')
     }
-    stage('Start Data Collector Service'){
+    stages {
+        stage('Start ON Data Collector Spider'){
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sshagent(['data_collector_ssh']) {
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker exec -i scraperapp python3 /opt/app/spiders/main.py"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker exec -i ontario-spider python3 /opt/app/spiders/real_estate_spider.py"'
                     }
                 }
             }
         }
+        stage('Start BC Data Collector Spider'){
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sshagent(['data_collector_ssh']) {
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker exec -i britishcolumbia-spider python3 /opt/app/spiders/real_estate_spider.py"'
+                    }
+                }
+            }
+        }
+    }
 }
