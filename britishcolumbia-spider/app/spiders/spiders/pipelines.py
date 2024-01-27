@@ -31,6 +31,12 @@ class MysqlPipeline(object):
       self.remax_db(item)
     elif spider.name == 'airbnblistings':
       self.airbnb_db(item)
+    elif spider.name == 'yelpapi':
+      self.yelp_db(item)
+    elif spider.name == 'walkscorezillow':
+      self.walkscore_zillow_db(item)
+    elif spider.name == 'walkscoreremax':
+      self.walkscore_remax_db(item)
     return item
   def cities_db(self, item):
     self.cursor.execute(""" insert ignore into CitiesData (CityName, CityType, Division, 
@@ -82,4 +88,28 @@ class MysqlPipeline(object):
                         item["id"], item["price"], f'{insertdate}'
                       ))
     self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
+    self.connection.commit()
+  def yelp_db(self, item):
+    self.cursor.execute(""" insert ignore into YelpData (Id, BusinessName, Rating, Reviews, BusinessAddress, 
+                        CityName, BusinessCoordinates) 
+                        values (%s, %s, %s, %s, %s, %s, ST_GeomFromText('POINT(%s %s)'))""",(
+                        item["id"], item["bizName"],item["rating"], item["reviewCount"], 
+                        item["address"], item["city"], item["lat"], item["lon"]
+                      ))
+    self.cursor.execute(""" insert ignore into YelpBusinessData (Id, Categories, PriceRange, BusinessUrl) 
+                        values (%s, %s, %s, %s)""",(
+                        item["id"], item['categories'], item['price'], item['url']
+                      ))
+    self.connection.commit()
+  def walkscore_zillow_db(self, item):
+    self.cursor.execute("""  insert ignore into ZillowListingsWalkscore (Id, WalkScore, TransitScore)  
+                        values (%s, %s, %s)""",(
+                        item["id"], item["walk"], item["transit"]
+                      ))
+    self.connection.commit()
+  def walkscore_remax_db(self, item):
+    self.cursor.execute("""  insert ignore into RemaxListingsWalkscore (Id, WalkScore, TransitScore)  
+                        values (%s, %s, %s)""",(
+                        item["id"], item["walk"], item["transit"]
+                      ))
     self.connection.commit()

@@ -20,7 +20,7 @@ class YelpApiSpider(scrapy.Spider):
     urls = []
     for city in cities:
       city = city.replace(" ","-").replace("/","-").replace("'","-").replace(",","-").replace("–","-")
-      city = f'{city}-ON'
+      city = f'{city}-BC'
       urls.append(f'https://api.yelp.com/v3/businesses/search?location={city}&limit=40&offset=0')
     self.start_urls = urls
 
@@ -40,7 +40,7 @@ class YelpApiSpider(scrapy.Spider):
         #Check if Price Range data in the business data exist
         if 'price' in business:
           price = business['price']
-        if business['location']['state'] == "ON":
+        if business['location']['state'] == "BC":
           yield {
           'id': business['id'],
           'bizName': business['name'],

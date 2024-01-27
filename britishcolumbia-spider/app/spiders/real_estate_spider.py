@@ -93,9 +93,9 @@ def real_estate_spider():
     for item in wikicity_output:
       # This filters the city names and append them to the list_cities array.
       list_cities.append(item['cityname'])
-    # yield runner.crawl(RemaxSpider, cities=list_cities)
-    # yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    # yield runner.crawl(AirbnbSpider, cities=list_cities)
+    yield runner.crawl(RemaxSpider, cities=list_cities)
+    yield runner.crawl(ZillowcaSpider, cities=list_cities)
+    yield runner.crawl(AirbnbSpider, cities=list_cities)
     reactor.stop()
   crawl()
   reactor.run()
