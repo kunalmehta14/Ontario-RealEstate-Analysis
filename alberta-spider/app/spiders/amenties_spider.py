@@ -1,7 +1,5 @@
 from spiders.spiders.wikicityspider import WikiUrbanCitySpider, WikiRuralCitySpider, WikiSpecializedCitySpider
-from spiders.spiders.remaxspider import RemaxSpider
-from spiders.spiders.zillowspider import ZillowcaSpider
-from spiders.spiders.airbnbspider import AirbnbSpider
+from spiders.spiders.yelpapispider import YelpApiSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
@@ -12,14 +10,13 @@ from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
-def real_estate_spider():
+def amenties_spider():
   warnings.filterwarnings("ignore")
-
   wikicity_output = []
   def crawler_results(item, spider):
     if spider.name == 'wikiurbancity' or spider.name == 'wikiruralcity' or spider.name == 'wikispecializedcity':
       wikicity_output.append(item)
-  
+
   dispatcher.connect(crawler_results, signal=signals.item_scraped)
   #The settings are required to override the default settings used
   #by the spiders.
@@ -95,12 +92,12 @@ def real_estate_spider():
     for item in wikicity_output:
       # This filters the city names and append them to the list_cities array.
       list_cities.append(item['cityname'])
-    yield runner.crawl(RemaxSpider, cities=list_cities)
-    yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    yield runner.crawl(AirbnbSpider, cities=list_cities)
+    #Note: Yelp doesn't allow web scraping, so to overcome that
+    #Yelp Fusion API is used in form of Spider function
+    yield runner.crawl(YelpApiSpider, cities=list_cities)
     reactor.stop()
   crawl()
   reactor.run()
-
+  
 if __name__ == '__main__':
-  real_estate_spider()
+  amenties_spider()

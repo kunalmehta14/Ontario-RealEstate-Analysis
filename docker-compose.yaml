@@ -11,30 +11,43 @@ networks:
 services:
 # Ontario Scraper App Configuration
   ontario-spider:
-      restart: always
-      container_name: ontario-spider
-      build:
-        context: ./ontario-spider
-        dockerfile: Dockerfile
-      volumes:
-       - ./ontario-spider/app:/opt/app
-      networks:
-        containerNetwork:
-          ipv4_address: 10.50.60.3
-      privileged: true
+    restart: always
+    container_name: ontario-spider
+    build:
+      context: ./ontario-spider
+      dockerfile: Dockerfile
+    volumes:
+      - ./ontario-spider/app:/opt/app
+    networks:
+      containerNetwork:
+        ipv4_address: 10.50.60.3
+    privileged: true
 # British Columbia Scraper App Configuration
   britishcolumbia-spider:
-      restart: always
-      container_name: britishcolumbia-spider
-      build:
-        context: ./britishcolumbia-spider
-        dockerfile: Dockerfile
-      volumes:
-        - ./britishcolumbia-spider/app:/opt/app
-      networks:
-        containerNetwork:
-          ipv4_address: 10.50.60.4
-      privileged: true
+    restart: always
+    container_name: britishcolumbia-spider
+    build:
+      context: ./britishcolumbia-spider
+      dockerfile: Dockerfile
+    volumes:
+      - ./britishcolumbia-spider/app:/opt/app
+    networks:
+      containerNetwork:
+        ipv4_address: 10.50.60.4
+    privileged: true
+# Alberta Scraper App Configuration
+  alberta-spider:
+    restart: always
+    container_name: alberta-spider
+    build:
+      context: ./alberta-spider
+      dockerfile: Dockerfile
+    volumes:
+      - ./alberta-spider/app:/opt/app
+    networks:
+      containerNetwork:
+        ipv4_address: 10.50.60.5
+    privileged: true
 
 # Monitoring Services
   node-exporter:
