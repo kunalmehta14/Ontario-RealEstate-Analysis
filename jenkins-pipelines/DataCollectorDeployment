@@ -50,11 +50,24 @@ pipeline {
                 }
             }
         }
+        stage('Copy Environmental Variables Alberta Spider'){
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withCredentials([file(credentialsId: 'ab_data_collector_env', variable: 'ab_data_collector_env'),
+                                file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
+                        sshagent(['data_collector_ssh']) {
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $ab_data_collector_env jenkins@$DATA_COLLECTOR_IP:/opt/appdir/alberta-spider/app'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir'
+                        }
+                    }
+                }
+            }
+        }
         stage('Stop Existing Docker Services'){
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sshagent(['data_collector_ssh']) {
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker stop ontario-spider britishcolumbia-spider"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker stop ontario-spider britishcolumbia-spider alberta-spider"'
                     }
                 }
                 
@@ -64,7 +77,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sshagent(['data_collector_ssh']) {
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker rm ontario-spider britishcolumbia-spider"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker rm ontario-spider britishcolumbia-spider alberta-spider"'
                     }
                 }
                 

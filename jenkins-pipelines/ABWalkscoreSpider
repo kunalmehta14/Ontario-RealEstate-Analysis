@@ -1,0 +1,17 @@
+pipeline {
+    agent any
+    environment {
+        DATA_COLLECTOR_IP = credentials('data_collector_ip')
+    }
+    stages {
+        stage('Start AB Walkscore Spider'){
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sshagent(['data_collector_ssh']) {
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker exec -i alberta-spider python3 /opt/app/spiders/walkscore.py"'
+                    }
+                }
+            }
+        }
+    }
+}
