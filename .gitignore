@@ -3,6 +3,7 @@ Lib
 Scripts
 __pycache__/
 pyvenv.cfg
+real_estate_meta_spider.py
 # env files
 .env
 environment.env
@@ -11,8 +12,10 @@ environment.env
 mysqlapp/
 docker-compose-dev.yaml
 *.xls
-# Ignore Log Files
+Images/
+# Ignore Log and test data Files
 *.logs
+*.json
 # Ignore Drawio Files
 *.drawio
 *.bkp

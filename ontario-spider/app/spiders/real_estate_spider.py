@@ -1,6 +1,6 @@
 from spiders.spiders.wikicityspider import WikiCitySpider
 from spiders.spiders.zillowspider import ZillowcaSpider
-from spiders.spiders.remaxspider import RemaxSpider
+from spiders.spiders.remaxspider import RemaxSpider, RemaxMetaSpider
 from spiders.spiders.mortgagespider import MortgageRatesSpider
 from spiders.spiders.airbnbspider import AirbnbSpider
 from scrapy.crawler import CrawlerRunner
@@ -10,6 +10,7 @@ from twisted.internet import reactor, defer
 from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
 import warnings, os
+import mysql.connector
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
@@ -90,6 +91,24 @@ def real_estate_spider():
   configure_logging(settings)
   #To add the city names from the city data collected from Wikipedia
   list_cities = []
+  #MySQL Connection To Query Data for location coordinates
+  conn = mysql.connector.connect(
+    host = os.getenv("MYSQL_HOST"),
+    user = os.getenv("MYSQL_USER"),
+    password = os.getenv("MYSQL_PASSWORD"),
+    database = os.getenv("MYSQL_DATABASE"),
+    port = os.getenv("MYSQL_PORT"),
+    auth_plugin='mysql_native_password')
+  cursor = conn.cursor(buffered=True , dictionary=True)
+  configure_logging(settings)
+  remax_listing_url_query = ''' SELECT ListingUrl FROM Ontario.RemaxListings
+                                WHERE NOT EXISTS (SELECT * FROM Ontario.RemaxListingsDetailed 
+                                WHERE RemaxListingsDetailed.Id = RemaxListings.Id) '''
+  cursor.execute(remax_listing_url_query)
+  remax_url_list = cursor.fetchall()
+  serialized_url_list = []
+  for remax_url in remax_url_list:
+    serialized_url_list.append(remax_url['ListingUrl'])
   runner = CrawlerRunner(settings)
   @defer.inlineCallbacks
   def crawl():    
@@ -106,6 +125,7 @@ def real_estate_spider():
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
     yield runner.crawl(AirbnbSpider, cities=list_cities)
     yield runner.crawl(RemaxSpider, cities=list_cities)
+    yield runner.crawl(RemaxMetaSpider, url_list=serialized_url_list)
     reactor.stop()
     city_avg_price_calculator()
   crawl()

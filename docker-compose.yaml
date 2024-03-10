@@ -18,6 +18,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./ontario-spider/app:/opt/app
+      - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
     networks:
       containerNetwork:
         ipv4_address: 10.50.60.3

@@ -3,8 +3,23 @@ import os
 import datetime
 from dotenv import find_dotenv, load_dotenv
 from scrapy.pipelines.files import FilesPipeline
+from scrapy.pipelines.images import ImagesPipeline
+import scrapy
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
+
+class DownloadListingImages(ImagesPipeline):
+  def get_media_requests(self, item, info):
+    for image_url in item['images']:
+      yield scrapy.Request(image_url, meta={'id': item['id'], 'website': item['website'], 'province': item['province']})
+  
+  def file_path(self, request, response=None, info=None, *, item=None):
+    item_id = request.meta['id']
+    website = request.meta['website']
+    province = request.meta['province']
+    image_name = request.url.split('/')[-1]
+    folder_path = f'./{website}/{province}/{item_id}'
+    return f'{folder_path}/{image_name}'
 
 insertdate = datetime.date.today()
 class MysqlPipeline(object):
@@ -28,6 +43,8 @@ class MysqlPipeline(object):
       self.zillow_db(item)
     elif spider.name == 'remaxca':
       self.remax_db(item)
+    elif spider.name == 'remaxcameta':
+      self.remax_detail_db(item)
     elif spider.name == 'ongovschool':
       self.schools_db(item)
     elif spider.name == 'ongovcol':
@@ -62,8 +79,8 @@ class MysqlPipeline(object):
                         item["listingType"], item['listingUrl']
                       ))
     self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=0 """)
-    self.cursor.execute(""" insert ignore into ZillowListingsAssociations (Id, Price, SaleStatus, timestamp) 
-                        values (%s, %s, %s, %s)""",(
+    self.cursor.execute(""" insert ignore into ZillowListingsAssociations (Id, Price, 
+                        SaleStatus, timestamp) values (%s, %s, %s, %s)""",(
                         item["id"], item["price"], item["saleStatus"], f'{insertdate}'
                       ))
     self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
@@ -82,7 +99,20 @@ class MysqlPipeline(object):
                         item["id"], item["price"], item["saleStatus"], f'{insertdate}'
                       ))
     self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
-    self.connection.commit()  
+    self.connection.commit()
+  
+  def remax_detail_db(self, item):
+    self.cursor.execute(""" insert ignore into RemaxListingsDetailed (Id, AgentID, AgentName, AgentOffice,
+                        AgentEmail, AgentPhone, Basement, TaxAmount, Fireplace, Garage,
+                        Heating, Sewer, SubDivision, Description, Images) 
+                        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
+                        item['id'], item['agentIId'], item['agentName'], item['agentOffice'],
+                        item['agentEmail'], item['agentPhone'], item['basement'], item['taxAmount'],
+                        item['fireplace'], item['garage'], item['heating'], item['sewer'],
+                        item['subDivision'], item['description'], item['image_rest_endpoints']
+                        ))
+    self.connection.commit()
+
   def schools_db(self, item):
     self.cursor.execute(""" insert ignore into SchoolData (Id, SchoolName, SchoolAddress, 
                         SchoolCoordinates, CityName) 
@@ -159,3 +189,4 @@ class DownloadFilePipelines(FilesPipeline):
   def file_path(self, request, response=None, info=None, *, item=None):
     print(f"Title returned: {item.get('Title')}")
     return item.get('Title')
+
