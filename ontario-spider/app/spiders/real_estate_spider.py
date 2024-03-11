@@ -52,7 +52,7 @@ def real_estate_spider():
       "Cache-Control": "max-age=0",
     },
     'RETRY_ENABLED': True,
-    'RETRY_TIMES': 5,
+    'RETRY_TIMES': 1,
     'RETRY_HTTP_CODES': [500, 502, 503, 504, 522, 524, 408, 429, 403],
     'RETRY_PRIORITY_ADJUST': -1,
     'RETRY_EXCEPTIONS': [
@@ -86,7 +86,7 @@ def real_estate_spider():
       "spiders.pipelines.MysqlPipeline": 100
     },
     'COOKIES_ENABLED': False,
-    'DOWNLOAD_DELAY': 5
+    'DOWNLOAD_DELAY': 2
   }
   configure_logging(settings)
   #To add the city names from the city data collected from Wikipedia
