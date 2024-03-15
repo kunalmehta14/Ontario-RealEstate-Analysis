@@ -3,7 +3,6 @@ Lib
 Scripts
 __pycache__/
 pyvenv.cfg
-real_estate_meta_spider.py
 # env files
 .env
 environment.env
