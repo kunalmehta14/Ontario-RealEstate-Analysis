@@ -17,8 +17,8 @@ RUN mkdir /opt/app
 # RUN chown administrator:root /opt/app
 COPY ./app/requirements.txt /opt/app/requirements.txt
 WORKDIR /opt/app
-RUN pip install --upgrade pip setuptools
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip setuptools --break-system-packages
+RUN pip install -r requirements.txt --break-system-packages
 #Copy supervisoryd.conf configuration that defines the startup services
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 #Copy the logging script and make it executable
