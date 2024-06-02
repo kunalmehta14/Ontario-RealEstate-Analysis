@@ -32,6 +32,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./britishcolumbia-spider/app:/opt/app
+      - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
     networks:
       containerNetwork:
         ipv4_address: 10.50.60.4
@@ -45,6 +46,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./alberta-spider/app:/opt/app
+      - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
     networks:
       containerNetwork:
         ipv4_address: 10.50.60.5

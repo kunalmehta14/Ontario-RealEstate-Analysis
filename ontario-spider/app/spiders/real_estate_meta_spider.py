@@ -59,7 +59,7 @@ def main_remax_meta():
       "scrapy.core.downloader.handlers.http11.TunnelError",
     ],
     #Logging Settings
-    # 'LOG_FILE': f'/var/log/scrapy.log',
+    'LOG_FILE': f'/var/log/scrapy.log',
     'LOGGING_ENABLED': True,
     'LOGGING_LEVEL': 'Debug',
     'LOG_STDOUT': True,
@@ -76,7 +76,7 @@ def main_remax_meta():
     },
     'IMAGES_STORE': '/opt/app/spiders/Images',
     'COOKIES_ENABLED': False,
-    'DOWNLOAD_DELAY': 5
+    'DOWNLOAD_DELAY': 1
   }
 
   #MySQL Connection To Query Data for location coordinates
@@ -89,9 +89,12 @@ def main_remax_meta():
     auth_plugin='mysql_native_password')
   cursor = conn.cursor(buffered=True , dictionary=True)
   configure_logging(settings)
-  remax_listing_url_query = ''' SELECT ListingUrl FROM Ontario.RemaxListings
-                                WHERE NOT EXISTS (SELECT * FROM Ontario.RemaxListingsDetailed 
-                                WHERE RemaxListingsDetailed.Id = RemaxListings.Id) '''
+  remax_listing_url_query = ''' SELECT rl.ListingUrl, rla.`timestamp` 
+                                FROM Ontario.RemaxListingsAssociations rla 
+                                INNER JOIN Ontario.RemaxListings rl ON rl.Id = rla.Id
+                                WHERE NOT EXISTS (SELECT * FROM Ontario.RemaxListingsDetailed rld
+                                WHERE rld.Id = rl.Id)
+                                AND rla.`timestamp` > (CURDATE() - INTERVAL 3 DAY) '''
   cursor.execute(remax_listing_url_query)
   remax_url_list = cursor.fetchall()
   serialized_url_list = []

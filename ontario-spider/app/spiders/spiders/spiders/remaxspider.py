@@ -117,13 +117,18 @@ class RemaxMetaSpider(scrapy.Spider):
     agent_phone = None
     agent_id = None
     if 'agent' in updated_data:
-      agent_first_name = updated_data['agent']['firstName']
-      agent_last_name = updated_data['agent']['lastName']
-      agent_name = f'{agent_first_name} {agent_last_name}'
-      agent_office = updated_data['agent']['officeName']
-      agent_email = updated_data['agent']['email']
-      agent_phone = updated_data['agent']['telephone']
-      agent_id = updated_data['agent']['personifyId']
+      if 'firstName' in updated_data['agent'] and 'lastName' in updated_data['agent']:
+        agent_first_name = updated_data['agent']['firstName']
+        agent_last_name = updated_data['agent']['lastName']
+        agent_name = f'{agent_first_name} {agent_last_name}'
+      if 'officeName' in updated_data['agent']:
+        agent_office = updated_data['agent']['officeName']
+      if 'email' in updated_data['agent']:
+        agent_email = updated_data['agent']['email']
+      if 'telephone' in updated_data['agent']:
+        agent_phone = updated_data['agent']['telephone']
+      if 'personifyId' in updated_data['agent']:
+        agent_id = updated_data['agent']['personifyId']
     # Other Features
     listingId = None
     if 'listingId' in updated_data:
@@ -152,6 +157,9 @@ class RemaxMetaSpider(scrapy.Spider):
     description = None
     if 'description' in updated_data:
       description = updated_data['description']
+    mlsnum = None
+    if 'mlsNum' in updated_data:
+      mlsnum = updated_data['mlsNum']
     # Website and Region settings
     website = 'remaxca'
     province = 'on'
@@ -169,6 +177,7 @@ class RemaxMetaSpider(scrapy.Spider):
     serialized_image_rest_endpoints = json.dumps(image_rest_endpoints)
     yield{
       'id': listingId,
+      'mlsNum': mlsnum,
       'website': website,
       'province': province,
       'agentIId': agent_id,

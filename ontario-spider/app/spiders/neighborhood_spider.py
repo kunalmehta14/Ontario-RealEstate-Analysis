@@ -1,26 +1,19 @@
-from spiders.spiders.wikicityspider import WikiUrbanCitySpider, WikiRuralCitySpider, WikiSpecializedCitySpider
-from spiders.spiders.remaxspider import RemaxSpider
-from spiders.spiders.zillowspider import ZillowcaSpider
-from spiders.spiders.airbnbspider import AirbnbSpider
+from spiders.spiders.geocoder import ZipCodesSpider, GeocoderSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
 from twisted.internet import reactor, defer
+from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
-import warnings, os
+import warnings
+import os
+import mysql.connector
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
-def real_estate_spider():
+def main_remax_meta():
   warnings.filterwarnings("ignore")
-
-  wikicity_output = []
-  def crawler_results(item, spider):
-    if spider.name == 'wikiurbancity' or spider.name == 'wikiruralcity' or spider.name == 'wikispecializedcity':
-      wikicity_output.append(item)
-  
-  dispatcher.connect(crawler_results, signal=signals.item_scraped)
   #The settings are required to override the default settings used
   #by the spiders.
   settings = {
@@ -46,8 +39,8 @@ def real_estate_spider():
       "Sec-Fetch-User": "?1",
       "Cache-Control": "max-age=0",
     },
-    'RETRY_ENABLED': True,
-    'RETRY_TIMES': 5,
+    'RETRY_ENABLED': False,
+    'RETRY_TIMES': 10,
     'RETRY_HTTP_CODES': [500, 502, 503, 504, 522, 524, 408, 429, 403],
     'RETRY_PRIORITY_ADJUST': -1,
     'RETRY_EXCEPTIONS': [
@@ -71,7 +64,6 @@ def real_estate_spider():
     'LOGGING_LEVEL': 'Debug',
     'LOG_STDOUT': True,
     'LOG_FORMAT': "%(levelname)s: %(message)s",
-    # Obey robots.txt rules
     'ROBOTSTXT_OBEY': False,
     # Set settings whose default value is deprecated to a future-proof value
     'REQUEST_FINGERPRINTER_IMPLEMENTATION': "2.7",
@@ -81,26 +73,44 @@ def real_estate_spider():
       "spiders.pipelines.MysqlPipeline": 100
     },
     'COOKIES_ENABLED': False,
-    'DOWNLOAD_DELAY': 2
+    'DOWNLOAD_DELAY': 1,
+    'DOWNLOAD_FAIL_ON_DATALOSS': False
   }
   configure_logging(settings)
-  #To add the city names from the city data collected from Wikipedia
+  #MySQL Connection To Query Data for location coordinates
+  conn = mysql.connector.connect(
+    host = os.getenv("MYSQL_HOST"),
+    user = os.getenv("MYSQL_USER"),
+    password = os.getenv("MYSQL_PASSWORD"),
+    database = os.getenv("MYSQL_DATABASE"),
+    port = os.getenv("MYSQL_PORT"),
+    auth_plugin='mysql_native_password')
+  cursor = conn.cursor(buffered=True , dictionary=True)
+  # Get list of cities for the ZipCodesSpider
+  cities_data_query = ''' SELECT CitiesData.CityName FROM CitiesData 
+                          WHERE NOT EXISTS (SELECT * FROM NeighborhoodData 
+                          WHERE NeighborhoodData.CityName = CitiesData.CityName)'''
+  cursor.execute(cities_data_query)
+  cities_data_result = cursor.fetchall()
   list_cities = []
+  for city in cities_data_result:
+    list_cities.append(city['CityName'])
+  # Get list of post codes for the GeoCoderSpider
+  post_code_query = ''' SELECT PostalCode FROM NeighborhoodData
+                        WHERE Coordinates IS NULL '''
+  cursor.execute(post_code_query)
+  post_code_result = cursor.fetchall()
+  list_post_codes = []
+  for post_code in post_code_result:
+    list_post_codes.append(post_code['PostalCode'])
   runner = CrawlerRunner(settings)
   @defer.inlineCallbacks
-  def crawl():    
-    yield runner.crawl(WikiUrbanCitySpider)
-    yield runner.crawl(WikiRuralCitySpider)
-    yield runner.crawl(WikiSpecializedCitySpider)
-    for item in wikicity_output:
-      # This filters the city names and append them to the list_cities array.
-      list_cities.append(item['cityname'])
-    yield runner.crawl(RemaxSpider, cities=list_cities)
-    yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    yield runner.crawl(AirbnbSpider, cities=list_cities)
+  def crawl():
+    # yield runner.crawl(ZipCodesSpider, cities=list_cities)
+    yield runner.crawl(GeocoderSpider, post_codes=list_post_codes)
     reactor.stop()
   crawl()
   reactor.run()
 
 if __name__ == '__main__':
-  real_estate_spider()
+  main_remax_meta()

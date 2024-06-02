@@ -102,14 +102,15 @@ class MysqlPipeline(object):
     self.connection.commit()
   
   def remax_detail_db(self, item):
-    self.cursor.execute(""" insert ignore into RemaxListingsDetailed (Id, AgentID, AgentName, AgentOffice,
+    self.cursor.execute(""" insert ignore into RemaxListingsDetailed (Id, Mls, AgentID, AgentName, AgentOffice,
                         AgentEmail, AgentPhone, Basement, TaxAmount, Fireplace, Garage,
                         Heating, Sewer, SubDivision, Description, Images) 
-                        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
-                        item['id'], item['agentIId'], item['agentName'], item['agentOffice'],
+                        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE Mls=%s """, (
+                        item['id'], item['mlsNum'], item['agentIId'], item['agentName'], item['agentOffice'],
                         item['agentEmail'], item['agentPhone'], item['basement'], item['taxAmount'],
                         item['fireplace'], item['garage'], item['heating'], item['sewer'],
-                        item['subDivision'], item['description'], item['image_rest_endpoints']
+                        item['subDivision'], item['description'], item['image_rest_endpoints'], item['mlsNum']
                         ))
     self.connection.commit()
 
@@ -189,4 +190,3 @@ class DownloadFilePipelines(FilesPipeline):
   def file_path(self, request, response=None, info=None, *, item=None):
     print(f"Title returned: {item.get('Title')}")
     return item.get('Title')
-

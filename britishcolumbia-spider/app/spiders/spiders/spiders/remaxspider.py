@@ -100,3 +100,99 @@ class RemaxSpider(scrapy.Spider):
           pass
       else:
         pass
+
+class RemaxMetaSpider(scrapy.Spider):
+  name = 'remaxcameta'
+  def __init__(self, url_list=None, *args, **kwargs):
+    super(RemaxMetaSpider, self).__init__(*args, **kwargs)
+    self.start_urls = url_list
+  def parse(self, response):
+    data = response.selector.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
+    updated_data = json.loads(data.replace('\\u00a0', '').replace('\\\\', '').strip())
+    updated_data = updated_data['props']['pageProps']['dehydratedState']['queries'][0]['state']['data']
+    # Agent Information
+    agent_name = None
+    agent_office = None
+    agent_email = None
+    agent_phone = None
+    agent_id = None
+    if 'agent' in updated_data:
+      if 'firstName' in updated_data['agent'] and 'lastName' in updated_data['agent']:
+        agent_first_name = updated_data['agent']['firstName']
+        agent_last_name = updated_data['agent']['lastName']
+        agent_name = f'{agent_first_name} {agent_last_name}'
+      if 'officeName' in updated_data['agent']:
+        agent_office = updated_data['agent']['officeName']
+      if 'email' in updated_data['agent']:
+        agent_email = updated_data['agent']['email']
+      if 'telephone' in updated_data['agent']:
+        agent_phone = updated_data['agent']['telephone']
+      if 'personifyId' in updated_data['agent']:
+        agent_id = updated_data['agent']['personifyId']
+    # Other Features
+    listingId = None
+    if 'listingId' in updated_data:
+      listingId = updated_data['listingId']
+    basement = None
+    if 'basement' in updated_data:
+      basement = updated_data['basement']
+    tax_amount = None
+    if 'taxAmount' in updated_data:
+      tax_amount = updated_data['taxAmount']
+    fireplace = None
+    if 'fireplace' in updated_data:
+      fireplace = updated_data['fireplace']
+    garage = None
+    if 'garage' in updated_data:
+      garage = updated_data['garage']
+    heating = None
+    if 'heating' in updated_data:
+      heating = updated_data['heating']
+    sewer = None
+    if 'sewer' in updated_data:
+      sewer = updated_data['sewer']
+    sub_division = None
+    if 'subDivision' in updated_data:
+      sub_division = updated_data['subDivision']
+    description = None
+    if 'description' in updated_data:
+      description = updated_data['description']
+    mlsnum = None
+    if 'mlsNum' in updated_data:
+      mlsnum = updated_data['mlsNum']
+    # Website and Region settings
+    website = 'remaxca'
+    province = 'bc'
+    # Listing Images
+    images = []
+    image_rest_endpoints = []
+    if 'imageUrls' in updated_data:
+      images = updated_data['imageUrls']
+    if images != []:
+      for image_url in images:
+        file_name = image_url.split('/')[-1]
+        server_endpoint = f'{os.getenv("IMAGE_FILE_SERVER")}/{website}/{province}/{listingId}'
+        rest_endpoint = f'{server_endpoint}/{file_name}'
+        image_rest_endpoints.append(rest_endpoint)
+    serialized_image_rest_endpoints = json.dumps(image_rest_endpoints)
+    yield{
+      'id': listingId,
+      'mlsNum': mlsnum,
+      'website': website,
+      'province': province,
+      'agentIId': agent_id,
+      'agentName': agent_name,
+      'agentOffice': agent_office,
+      'agentEmail': agent_email,
+      'agentPhone': agent_phone,
+      'basement': basement,
+      'taxAmount': tax_amount,
+      'fireplace': fireplace,
+      'garage': garage,
+      'heating': heating,
+      'sewer': sewer,
+      'subDivision': sub_division,
+      'description': description,
+      'images': images,
+      'image_rest_endpoints': serialized_image_rest_endpoints
+    }

@@ -2,9 +2,24 @@ import mysql.connector
 import os
 import datetime
 from dotenv import find_dotenv, load_dotenv
+import scrapy
+from scrapy.pipelines.images import ImagesPipeline
 from scrapy.pipelines.files import FilesPipeline
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
+
+class DownloadListingImages(ImagesPipeline):
+  def get_media_requests(self, item, info):
+    for image_url in item['images']:
+      yield scrapy.Request(image_url, meta={'id': item['id'], 'website': item['website'], 'province': item['province']})
+  
+  def file_path(self, request, response=None, info=None, *, item=None):
+    item_id = request.meta['id']
+    website = request.meta['website']
+    province = request.meta['province']
+    image_name = request.url.split('/')[-1]
+    folder_path = f'./{website}/{province}/{item_id}'
+    return f'{folder_path}/{image_name}'
 
 insertdate = datetime.date.today()
 class MysqlPipeline(object):
@@ -29,6 +44,8 @@ class MysqlPipeline(object):
       self.zillow_db(item)
     elif spider.name == 'remaxca':
       self.remax_db(item)
+    elif spider.name == 'remaxcameta':
+      self.remax_detail_db(item)
     elif spider.name == 'airbnblistings':
       self.airbnb_db(item)
     elif spider.name == 'yelpapi':
@@ -75,6 +92,18 @@ class MysqlPipeline(object):
                         item["id"], item["price"], item["saleStatus"], f'{insertdate}'
                       ))
     self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
+    self.connection.commit()
+  def remax_detail_db(self, item):
+    self.cursor.execute(""" insert ignore into RemaxListingsDetailed (Id, Mls, AgentID, AgentName, AgentOffice,
+                        AgentEmail, AgentPhone, Basement, TaxAmount, Fireplace, Garage,
+                        Heating, Sewer, SubDivision, Description, Images) 
+                        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE Mls=%s """, (
+                        item['id'], item['mlsNum'], item['agentIId'], item['agentName'], item['agentOffice'],
+                        item['agentEmail'], item['agentPhone'], item['basement'], item['taxAmount'],
+                        item['fireplace'], item['garage'], item['heating'], item['sewer'],
+                        item['subDivision'], item['description'], item['image_rest_endpoints'], item['mlsNum']
+                        ))
     self.connection.commit()
   def airbnb_db(self, item):
     self.cursor.execute("""  insert ignore into AirbnbData (Id, ListingName, ListingObjType, CityName, 

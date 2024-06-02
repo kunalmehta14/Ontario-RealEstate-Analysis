@@ -4,7 +4,7 @@ pipeline {
         DATA_COLLECTOR_IP = credentials('data_collector_ip')
     }
     stages {
-        stage('Start ON Walkscore Spider'){
+        stage('Start ON MetaData Spider'){
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sshagent(['data_collector_ssh']) {

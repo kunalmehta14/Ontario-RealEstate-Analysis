@@ -1,26 +1,19 @@
-from spiders.spiders.wikicityspider import WikiUrbanCitySpider, WikiRuralCitySpider, WikiSpecializedCitySpider
-from spiders.spiders.remaxspider import RemaxSpider
-from spiders.spiders.zillowspider import ZillowcaSpider
-from spiders.spiders.airbnbspider import AirbnbSpider
+from spiders.spiders.remaxspider import RemaxMetaSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
 from twisted.internet import reactor, defer
+from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
-import warnings, os
+import warnings
+import os
+import mysql.connector
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
-def real_estate_spider():
+def main_remax_meta():
   warnings.filterwarnings("ignore")
-
-  wikicity_output = []
-  def crawler_results(item, spider):
-    if spider.name == 'wikiurbancity' or spider.name == 'wikiruralcity' or spider.name == 'wikispecializedcity':
-      wikicity_output.append(item)
-  
-  dispatcher.connect(crawler_results, signal=signals.item_scraped)
   #The settings are required to override the default settings used
   #by the spiders.
   settings = {
@@ -46,8 +39,8 @@ def real_estate_spider():
       "Sec-Fetch-User": "?1",
       "Cache-Control": "max-age=0",
     },
-    'RETRY_ENABLED': True,
-    'RETRY_TIMES': 5,
+    'RETRY_ENABLED': False,
+    'RETRY_TIMES': 2,
     'RETRY_HTTP_CODES': [500, 502, 503, 504, 522, 524, 408, 429, 403],
     'RETRY_PRIORITY_ADJUST': -1,
     'RETRY_EXCEPTIONS': [
@@ -78,29 +71,46 @@ def real_estate_spider():
     # TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
     'FEED_EXPORT_ENCODING': "utf-8",
     'ITEM_PIPELINES': {
+      "spiders.pipelines.DownloadListingImages": 50,
       "spiders.pipelines.MysqlPipeline": 100
     },
+    'IMAGES_STORE': '/opt/app/spiders/Images',
     'COOKIES_ENABLED': False,
-    'DOWNLOAD_DELAY': 2
+    'DOWNLOAD_DELAY': 5
   }
+
+  #MySQL Connection To Query Data for location coordinates
+  conn = mysql.connector.connect(
+    host = os.getenv("MYSQL_HOST"),
+    user = os.getenv("MYSQL_USER"),
+    password = os.getenv("MYSQL_PASSWORD"),
+    database = os.getenv("MYSQL_DATABASE"),
+    port = os.getenv("MYSQL_PORT"),
+    auth_plugin='mysql_native_password')
+  cursor = conn.cursor(buffered=True , dictionary=True)
   configure_logging(settings)
-  #To add the city names from the city data collected from Wikipedia
-  list_cities = []
+  # Gets the Listing URL to collect metadata for the listings
+  # Queries the listings that have been active since last 2 days
+  remax_listing_url_query = ''' SELECT rl.ListingUrl, rla.`timestamp` 
+                                FROM BritishColumbia.RemaxListingsAssociations rla 
+                                INNER JOIN BritishColumbia.RemaxListings rl ON rl.Id = rla.Id
+                                WHERE NOT EXISTS (SELECT * FROM BritishColumbia.RemaxListingsDetailed rld
+                                WHERE rld.Id = rl.Id)
+                                AND rla.`timestamp` > (CURDATE() - INTERVAL 2 DAY) '''
+  cursor.execute(remax_listing_url_query)
+  remax_url_list = cursor.fetchall()
+  serialized_url_list = []
+  for remax_url in remax_url_list:
+    serialized_url_list.append(remax_url['ListingUrl'])
   runner = CrawlerRunner(settings)
   @defer.inlineCallbacks
-  def crawl():    
-    yield runner.crawl(WikiUrbanCitySpider)
-    yield runner.crawl(WikiRuralCitySpider)
-    yield runner.crawl(WikiSpecializedCitySpider)
-    for item in wikicity_output:
-      # This filters the city names and append them to the list_cities array.
-      list_cities.append(item['cityname'])
-    yield runner.crawl(RemaxSpider, cities=list_cities)
-    yield runner.crawl(ZillowcaSpider, cities=list_cities)
-    yield runner.crawl(AirbnbSpider, cities=list_cities)
+  def crawl():
+    #Queries the DB to get the coordinates for all the Remax Listings
+    #Get's the Walkscore for the Remax Listings
+    yield runner.crawl(RemaxMetaSpider, url_list=serialized_url_list)
     reactor.stop()
   crawl()
   reactor.run()
 
 if __name__ == '__main__':
-  real_estate_spider()
+  main_remax_meta()

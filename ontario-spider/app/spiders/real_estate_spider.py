@@ -86,7 +86,7 @@ def real_estate_spider():
       "spiders.pipelines.MysqlPipeline": 100
     },
     'COOKIES_ENABLED': False,
-    'DOWNLOAD_DELAY': 2
+    'DOWNLOAD_DELAY': 1
   }
   configure_logging(settings)
   #To add the city names from the city data collected from Wikipedia
