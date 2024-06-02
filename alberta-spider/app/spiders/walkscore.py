@@ -1,4 +1,4 @@
-from spiders.spiders.walkscorespider import WalkScoreZillowSpider, WalkScoreRemaxSpider
+from spiders.spiders.spiders.walkscorespider import WalkScoreZillowSpider, WalkScoreRemaxSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
