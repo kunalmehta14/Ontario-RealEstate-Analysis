@@ -1,4 +1,4 @@
-from spiders.spiders.remaxspider import RemaxMetaSpider
+from spiders.spiders.realestatespider import RealEstateMetaSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
@@ -12,7 +12,7 @@ from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
-def main_remax_meta():
+def main_realestate_meta():
   warnings.filterwarnings("ignore")
   #The settings are required to override the default settings used
   #by the spiders.
@@ -91,26 +91,26 @@ def main_remax_meta():
   configure_logging(settings)
   # Gets the Listing URL to collect metadata for the listings
   # Queries the listings that have been active since last 2 days
-  remax_listing_url_query = ''' SELECT rl.ListingUrl, rla.`timestamp` 
-                                FROM Alberta.RemaxListingsAssociations rla 
-                                INNER JOIN Alberta.RemaxListings rl ON rl.Id = rla.Id
-                                WHERE NOT EXISTS (SELECT * FROM Alberta.RemaxListingsDetailed rld
+  realestate_listing_url_query = ''' SELECT rl.ListingUrl, rla.`timestamp` 
+                                FROM Alberta.RealEstateListingsAssociations rla 
+                                INNER JOIN Alberta.RealEstateListings rl ON rl.Id = rla.Id
+                                WHERE NOT EXISTS (SELECT * FROM Alberta.RealEstateListingsDetailed rld
                                 WHERE rld.Id = rl.Id)
                                 AND rla.`timestamp` > (CURDATE() - INTERVAL 2 DAY) '''
-  cursor.execute(remax_listing_url_query)
-  remax_url_list = cursor.fetchall()
+  cursor.execute(realestate_listing_url_query)
+  realestate_url_list = cursor.fetchall()
   serialized_url_list = []
-  for remax_url in remax_url_list:
-    serialized_url_list.append(remax_url['ListingUrl'])
+  for realestate_url in realestate_url_list:
+    serialized_url_list.append(realestate_url['ListingUrl'])
   runner = CrawlerRunner(settings)
   @defer.inlineCallbacks
   def crawl():
-    #Queries the DB to get the coordinates for all the Remax Listings
-    #Get's the Walkscore for the Remax Listings
-    yield runner.crawl(RemaxMetaSpider, url_list=serialized_url_list)
+    #Queries the DB to get the coordinates for all the Real Estate Listings
+    #Get's the Walkscore for the Real Estate Listings
+    yield runner.crawl(RealEstateMetaSpider, url_list=serialized_url_list)
     reactor.stop()
   crawl()
   reactor.run()
 
 if __name__ == '__main__':
-  main_remax_meta()
+  main_realestate_meta()

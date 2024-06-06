@@ -1,4 +1,4 @@
-from spiders.spiders.walkscorespider import WalkScoreZillowSpider, WalkScoreRemaxSpider
+from spiders.spiders.walkscorespider import WalkScoreZillowSpider, WalkScoreRealEstateSpider
 from scrapy.crawler import CrawlerRunner
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
@@ -91,18 +91,18 @@ def main_walkscore():
                                 ST_Y(ZillowListings.ListingCoordinates) AS lat FROM ZillowListings WHERE NOT EXISTS 
                                 (SELECT * FROM ZillowListingsWalkscore WHERE 
                                 ZillowListingsWalkscore.Id = ZillowListings.Id) '''
-  remax_coordinates_query = ''' SELECT RemaxListings.Id, ST_X(RemaxListings.ListingCoordinates) AS lon, 
-                                ST_Y(RemaxListings.ListingCoordinates) AS lat FROM RemaxListings WHERE NOT EXISTS 
-                                (SELECT * FROM RemaxListingsWalkscore WHERE 
-                                RemaxListingsWalkscore.Id = RemaxListings.Id) '''
+  realestate_coordinates_query = ''' SELECT RealEstateListings.Id, ST_X(RealEstateListings.ListingCoordinates) AS lon, 
+                                ST_Y(RealEstateListings.ListingCoordinates) AS lat FROM RealEstateListings WHERE NOT EXISTS 
+                                (SELECT * FROM RealEstateListingsWalkscore WHERE 
+                                RealEstateListingsWalkscore.Id = RealEstateListings.Id) '''
   runner = CrawlerRunner(settings)
   @defer.inlineCallbacks
   def crawl():
-    #Queries the DB to get the coordinates for all the Remax Listings
-    cursor.execute(remax_coordinates_query)
-    remax_coordinates = cursor.fetchall()
-    #Get's the Walkscore for the Remax Listings
-    yield runner.crawl(WalkScoreRemaxSpider, listings_coordinates=remax_coordinates)
+    #Queries the DB to get the coordinates for all the RealEstate Listings
+    cursor.execute(realestate_coordinates_query)
+    realestate_coordinates = cursor.fetchall()
+    #Get's the Walkscore for the RealEstate Listings
+    yield runner.crawl(WalkScoreRealEstateSpider, listings_coordinates=realestate_coordinates)
     #Queries the DB to get the coordinates for all the Zillow Listings
     cursor.execute(zillow_coordinates_query)
     zillow_coordinates = cursor.fetchall()

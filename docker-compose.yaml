@@ -13,9 +13,7 @@ services:
   ontario-spider:
     restart: always
     container_name: ontario-spider
-    build:
-      context: ./ontario-spider
-      dockerfile: Dockerfile
+    image: ghcr.io/kunalmehta14/realestate-datapipeline
     volumes:
       - ./ontario-spider/app:/opt/app
       - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
@@ -27,9 +25,7 @@ services:
   britishcolumbia-spider:
     restart: always
     container_name: britishcolumbia-spider
-    build:
-      context: ./britishcolumbia-spider
-      dockerfile: Dockerfile
+    image: ghcr.io/kunalmehta14/realestate-datapipeline
     volumes:
       - ./britishcolumbia-spider/app:/opt/app
       - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
@@ -41,9 +37,7 @@ services:
   alberta-spider:
     restart: always
     container_name: alberta-spider
-    build:
-      context: ./alberta-spider
-      dockerfile: Dockerfile
+    image: ghcr.io/kunalmehta14/realestate-datapipeline
     volumes:
       - ./alberta-spider/app:/opt/app
       - /opt/scrapy-images/images-db1:/opt/app/spiders/Images

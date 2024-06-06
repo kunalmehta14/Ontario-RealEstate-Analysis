@@ -5,10 +5,10 @@ from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
-class RemaxSpider(scrapy.Spider):
-    name = 'remaxca'
+class RealEstateSpider(scrapy.Spider):
+    name = 'realestateca'
     def __init__(self, cities=None, *args, **kwargs):
-      super(RemaxSpider, self).__init__(*args, **kwargs)
+      super(RealEstateSpider, self).__init__(*args, **kwargs)
       urls = []
       for city in cities:
         city = city.lower().replace(" ","-").replace("/","-").replace("'","-").replace(".","-").replace("–","-").replace("--","-")
@@ -24,7 +24,7 @@ class RemaxSpider(scrapy.Spider):
       #Convert it into MySQL accepted date object
       timestamp = timestamp.strftime('%Y-%m-%d')
       for listing in listings:
-        #Remax uses a dictionary to maintain the listing type into a form of
+        #RealEstate uses a dictionary to maintain the listing type into a form of
         #id to string. This for loop goes through the listingid and check what
         #what is the status associated with that listingid.
         listing_type = None
@@ -101,10 +101,10 @@ class RemaxSpider(scrapy.Spider):
       else:
         pass
 
-class RemaxMetaSpider(scrapy.Spider):
-  name = 'remaxcameta'
+class RealEstateMetaSpider(scrapy.Spider):
+  name = 'realestatecameta'
   def __init__(self, url_list=None, *args, **kwargs):
-    super(RemaxMetaSpider, self).__init__(*args, **kwargs)
+    super(RealEstateMetaSpider, self).__init__(*args, **kwargs)
     self.start_urls = url_list
   def parse(self, response):
     data = response.selector.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
@@ -161,7 +161,7 @@ class RemaxMetaSpider(scrapy.Spider):
     if 'mlsNum' in updated_data:
       mlsnum = updated_data['mlsNum']
     # Website and Region settings
-    website = 'remaxca'
+    website = 'realestateca'
     province = 'bc'
     # Listing Images
     images = []

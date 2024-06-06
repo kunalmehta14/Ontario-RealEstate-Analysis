@@ -1,5 +1,5 @@
 from spiders.spiders.wikicityspider import WikiCitySpider
-from spiders.spiders.remaxspider import RemaxSpider
+from spiders.spiders.realestatespider import RealEstateSpider
 from spiders.spiders.zillowspider import ZillowcaSpider
 from spiders.spiders.airbnbspider import AirbnbSpider
 from scrapy.crawler import CrawlerRunner
@@ -93,7 +93,7 @@ def real_estate_spider():
     for item in wikicity_output:
       # This filters the city names and append them to the list_cities array.
       list_cities.append(item['cityname'])
-    yield runner.crawl(RemaxSpider, cities=list_cities)
+    yield runner.crawl(RealEstateSpider, cities=list_cities)
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
     yield runner.crawl(AirbnbSpider, cities=list_cities)
     reactor.stop()

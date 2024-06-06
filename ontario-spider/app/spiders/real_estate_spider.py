@@ -1,6 +1,6 @@
 from spiders.spiders.wikicityspider import WikiCitySpider
 from spiders.spiders.zillowspider import ZillowcaSpider
-from spiders.spiders.remaxspider import RemaxSpider
+from spiders.spiders.realestatespider import RealEstateSpider
 from spiders.spiders.mortgagespider import MortgageRatesSpider
 from spiders.spiders.airbnbspider import AirbnbSpider
 from scrapy.crawler import CrawlerRunner
@@ -99,7 +99,7 @@ def real_estate_spider():
     for item in wikicity_output:
       # This filters the city names and append them to the list_cities array. 
       # By default the list contains two entries with the name "Hamilton". 
-      # Zillow and Remax only has data for the Hamilton city, not the township.
+      # Zillow and RealEstate only has data for the Hamilton city, not the township.
       if item['cityname'] == 'Hamilton' and item['cityType'] == 'Township':
         pass
       else:
@@ -107,7 +107,7 @@ def real_estate_spider():
     yield runner.crawl(MortgageRatesSpider)
     yield runner.crawl(ZillowcaSpider, cities=list_cities)
     yield runner.crawl(AirbnbSpider, cities=list_cities)
-    yield runner.crawl(RemaxSpider, cities=list_cities)
+    yield runner.crawl(RealEstateSpider, cities=list_cities)
     reactor.stop()
     city_avg_price_calculator()
   crawl()

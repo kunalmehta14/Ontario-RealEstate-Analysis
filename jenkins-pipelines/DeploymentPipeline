@@ -1,0 +1,136 @@
+pipeline {
+    agent any
+    environment {
+        DATA_COLLECTOR_IP = credentials('data_collector_ip')
+        IMAGE_NAME='kunalmehta14/realestate-datapipeline'
+        PREVIOUS_IMAGE_VERSION='0'
+        IMAGE_VERSION='1'
+        GITHUB_TOKEN = credentials('github_token')
+    }
+    stages {
+        stage('Clone the repo') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    echo 'clone the repo'
+                    sh 'rm -fr RealEstate-DataPipeline'
+                    sh 'git clone https://github.com/kunalmehta14/RealEstate-DataPipeline.git'
+                }
+            }
+        }
+        stage('Deploy it to datacollector server') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sshagent(['data_collector_ssh']) {
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "git init /opt/realestate-data-pipeline"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "git config --global --add safe.directory /opt/realestate-data-pipeline"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "git -C /opt/realestate-data-pipeline pull https://github.com/kunalmehta14/RealEstate-DataPipeline.git"'
+                    }
+                }
+            }
+        }
+        stage('Remove existing image') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sshagent(['data_collector_ssh']) {
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker rmi $IMAGE_NAME:$PREVIOUS_IMAGE_VERSION"'
+                    }
+                }
+            }
+        }
+        stage('Build image') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sshagent(['data_collector_ssh']) {
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker build -t $IMAGE_NAME:$IMAGE_VERSION /opt/realestate-data-pipeline/docker-image"'
+                    }
+                }
+            }
+        }
+        stage('Login to GHCR') {
+            steps {
+                sshagent(['data_collector_ssh']) {
+                    sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "echo $GITHUB_TOKEN_PSW | docker login ghcr.io -u $GITHUB_TOKEN_USR --password-stdin"'
+                }
+            }
+        }
+        stage('Tag image') {
+            steps {
+                sshagent(['data_collector_ssh']) {
+                    sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker tag $IMAGE_NAME:$IMAGE_VERSION ghcr.io/$IMAGE_NAME:$IMAGE_VERSION"'
+                }
+            }
+        }
+        stage('Push image') {
+            steps {
+                sshagent(['data_collector_ssh']) {
+                    sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker push ghcr.io/$IMAGE_NAME:$IMAGE_VERSION"'
+                }
+            }
+        }
+        stage('Stop and remove docker service') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sshagent(['data_collector_ssh']) {
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker stop alberta-spider britishcolumbia-spider ontario-spider"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker rm alberta-spider britishcolumbia-spider ontario-spider"'
+                    }
+                }
+            }
+        }
+        stage('Start docker service') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sshagent(['data_collector_ssh']) {
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker compose -f /opt/realestate-data-pipeline/docker-compose.yaml up -d --no-deps --build --always-recreate-deps"'
+                    }
+                }
+            }
+        }
+        stage('Copy Environmental Variables Ontario Spider'){
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withCredentials([file(credentialsId: 'on_data_collector_env', variable: 'on_data_collector_env'),
+                                file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
+                        sshagent(['data_collector_ssh']) {
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $on_data_collector_env jenkins@$DATA_COLLECTOR_IP:/opt/realestate-data-pipeline/ontario-spider/app'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/realestate-data-pipeline'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Copy Environmental Variables British Columbia Spider'){
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withCredentials([file(credentialsId: 'bc_data_collector_env', variable: 'bc_data_collector_env'),
+                                file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
+                        sshagent(['data_collector_ssh']) {
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $bc_data_collector_env jenkins@$DATA_COLLECTOR_IP:/opt/realestate-data-pipeline/britishcolumbia-spider/app'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/realestate-data-pipeline'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Copy Environmental Variables Alberta Spider'){
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withCredentials([file(credentialsId: 'ab_data_collector_env', variable: 'ab_data_collector_env'),
+                                file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
+                        sshagent(['data_collector_ssh']) {
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $ab_data_collector_env jenkins@$DATA_COLLECTOR_IP:/opt/realestate-data-pipeline/alberta-spider/app'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/realestate-data-pipeline'
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            sshagent(['data_collector_ssh']) {
+                sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker logout"'
+            }
+        }
+    }
+}

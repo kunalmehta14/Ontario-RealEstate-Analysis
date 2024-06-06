@@ -4,7 +4,7 @@ Beds INT, Baths INT, ListingCoordinates POINT NOT NULL,
 ListingType VARCHAR(50), ListingUrl VARCHAR(2083),
 PRIMARY KEY(Id), FOREIGN KEY (CityName) REFERENCES CitiesData(CityName));
 
-CREATE TABLE RemaxListings (Id VARCHAR(50) NOT NULL,
+CREATE TABLE RealEstateListings (Id VARCHAR(50) NOT NULL,
 AddressStreet VARCHAR(300) NOT NULL, CityName VARCHAR(100) NOT NULL, 
 Beds INT, Baths INT, ListingCoordinates POINT NOT NULL, ListingType VARCHAR(50),
 ListingDate DATETIME, Area INT, ListingUrl VARCHAR(2083),

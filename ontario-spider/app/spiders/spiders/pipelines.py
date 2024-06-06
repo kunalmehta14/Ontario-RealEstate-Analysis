@@ -41,10 +41,10 @@ class MysqlPipeline(object):
       self.cities_db(item)
     elif spider.name == 'zillowca':
       self.zillow_db(item)
-    elif spider.name == 'remaxca':
-      self.remax_db(item)
-    elif spider.name == 'remaxcameta':
-      self.remax_detail_db(item)
+    elif spider.name == 'realestateca':
+      self.realestate_db(item)
+    elif spider.name == 'realestatecameta':
+      self.realestate_detail_db(item)
     elif spider.name == 'ongovschool':
       self.schools_db(item)
     elif spider.name == 'ongovcol':
@@ -59,8 +59,8 @@ class MysqlPipeline(object):
       self.airbnb_db(item)
     elif spider.name == 'walkscorezillow':
       self.walkscore_zillow_db(item)
-    elif spider.name == 'walkscoreremax':
-      self.walkscore_remax_db(item)
+    elif spider.name == 'walkscorerealestate':
+      self.walkscore_realestate_db(item)
     return item
   def cities_db(self, item):
     self.cursor.execute(""" insert ignore into CitiesData (CityName, CityType, Division, 
@@ -85,8 +85,8 @@ class MysqlPipeline(object):
                       ))
     self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
     self.connection.commit()
-  def remax_db(self, item):
-    self.cursor.execute(""" insert ignore into RemaxListings (Id, AddressStreet, CityName, Beds, Baths, 
+  def realestate_db(self, item):
+    self.cursor.execute(""" insert ignore into RealEstateListings (Id, AddressStreet, CityName, Beds, Baths, 
                         ListingCoordinates, ListingType, ListingDate, Area, ListingUrl) 
                         values (%s, %s, %s, %s, %s, ST_GeomFromText('POINT(%s %s)'), %s, %s, %s, %s)""",(
                       item["id"], item["address"], item["city"],item["beds"], item["baths"], 
@@ -94,15 +94,15 @@ class MysqlPipeline(object):
                       item['sqft'], item['listingUrl']
                       ))
     self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=0 """)
-    self.cursor.execute(""" insert ignore into RemaxListingsAssociations (Id, Price, SaleStatus, timestamp) 
+    self.cursor.execute(""" insert ignore into RealEstateListingsAssociations (Id, Price, SaleStatus, timestamp) 
                         values (%s, %s, %s, %s)""",(
                         item["id"], item["price"], item["saleStatus"], f'{insertdate}'
                       ))
     self.cursor.execute(""" SET FOREIGN_KEY_CHECKS=1 """)
     self.connection.commit()
   
-  def remax_detail_db(self, item):
-    self.cursor.execute(""" insert ignore into RemaxListingsDetailed (Id, Mls, AgentID, AgentName, AgentOffice,
+  def realestate_detail_db(self, item):
+    self.cursor.execute(""" insert ignore into RealEstateListingsDetailed (Id, Mls, AgentID, AgentName, AgentOffice,
                         AgentEmail, AgentPhone, Basement, TaxAmount, Fireplace, Garage,
                         Heating, Sewer, SubDivision, Description, Images) 
                         values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -179,8 +179,8 @@ class MysqlPipeline(object):
                         item["id"], item["walk"], item["transit"]
                       ))
     self.connection.commit()
-  def walkscore_remax_db(self, item):
-    self.cursor.execute("""  insert ignore into RemaxListingsWalkscore (Id, WalkScore, TransitScore)  
+  def walkscore_realestate_db(self, item):
+    self.cursor.execute("""  insert ignore into RealEstateListingsWalkscore (Id, WalkScore, TransitScore)  
                         values (%s, %s, %s)""",(
                         item["id"], item["walk"], item["transit"]
                       ))
