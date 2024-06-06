@@ -1,4 +1,6 @@
 FROM ubuntu:latest
+# To saved the packaged docker image to the respective Github repo.
+LABEL org.opencontainers.image.source https://github.com/kunalmehta14/RealEstate-DataPipeline
 ENV LANG en_US.utf8
 #Update Ubuntu
 RUN apt update && apt full-upgrade -y

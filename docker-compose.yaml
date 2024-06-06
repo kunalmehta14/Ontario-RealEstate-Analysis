@@ -13,7 +13,7 @@ services:
   ontario-spider:
     restart: always
     container_name: ontario-spider
-    image: ghcr.io/kunalmehta14/realestate-datapipeline
+    image: ghcr.io/kunalmehta14/realestate-datapipeline:1
     volumes:
       - ./ontario-spider/app:/opt/app
       - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
@@ -25,7 +25,7 @@ services:
   britishcolumbia-spider:
     restart: always
     container_name: britishcolumbia-spider
-    image: ghcr.io/kunalmehta14/realestate-datapipeline
+    image: ghcr.io/kunalmehta14/realestate-datapipeline:1
     volumes:
       - ./britishcolumbia-spider/app:/opt/app
       - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
@@ -37,7 +37,7 @@ services:
   alberta-spider:
     restart: always
     container_name: alberta-spider
-    image: ghcr.io/kunalmehta14/realestate-datapipeline
+    image: ghcr.io/kunalmehta14/realestate-datapipeline:1
     volumes:
       - ./alberta-spider/app:/opt/app
       - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
