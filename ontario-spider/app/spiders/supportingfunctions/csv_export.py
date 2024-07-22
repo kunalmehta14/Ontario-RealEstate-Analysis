@@ -89,18 +89,18 @@ def main():
                     WHEN Price BETWEEN 10000000 AND 15000000 THEN '10000000-15000000'
                     WHEN Price BETWEEN 15000000 AND 20000000 THEN '15000000-20000000'
                 END) AS PriceCategorization
-                FROM Ontario.RemaxListingsAssociations rla 
-                INNER JOIN Ontario.RemaxListings rl ON rl.Id = rla.Id
+                FROM Ontario.RealEstateListingsAssociations rla 
+                INNER JOIN Ontario.RealEstateListings rl ON rl.Id = rla.Id
                 INNER JOIN CitiesData cd ON rl.CityName = cd.CityName
-                LEFT JOIN Ontario.RemaxListingsSchools rls  ON
+                LEFT JOIN Ontario.RealEstateListingsSchools rls  ON
                 rl.Id = rls.Id
-                LEFT JOIN Ontario.RemaxListingsColleges rlc ON
+                LEFT JOIN Ontario.RealEstateListingsColleges rlc ON
                 rl.Id = rlc.Id
-                LEFT JOIN Ontario.RemaxListingsUniversities rlu ON
+                LEFT JOIN Ontario.RealEstateListingsUniversities rlu ON
                 rl.Id = rlu.Id
-                LEFT JOIN Ontario.RemaxListingsAmeneties rlam ON
+                LEFT JOIN Ontario.RealEstateListingsAmeneties rlam ON
                 rl.Id = rlam.Id
-                LEFT JOIN Ontario.RemaxListingsAirbnb rlab ON
+                LEFT JOIN Ontario.RealEstateListingsAirbnb rlab ON
                 rl.Id = rlab.Id
                 WHERE rl.Area IS NOT NULL
                 AND rl.Area > 100

@@ -28,12 +28,12 @@ def city_avg_price_calculator():
   # Get the latest average price of all the cities in Ontario
   # Rental listings only
   query_rent_price = ''' SELECT rl2.CityName, ROUND(AVG(rla2.Price), 0) AS Price
-                    FROM Ontario.RemaxListingsAssociations rla2 
-                    INNER JOIN Ontario.RemaxListings rl2 ON rl2.Id = rla2.Id
+                    FROM Ontario.RealEstateListingsAssociations rla2 
+                    INNER JOIN Ontario.RealEstateListings rl2 ON rl2.Id = rla2.Id
                     INNER JOIN Ontario.CitiesData cd ON rl2.CityName = cd.CityName
                     WHERE rl2.Beds <= 15
                     AND rl2.Baths <= 10
-                    AND rla2.`timestamp` = (SELECT MAX(rla.`timestamp`)  FROM Ontario.RemaxListingsAssociations rla)
+                    AND rla2.`timestamp` = (SELECT MAX(rla.`timestamp`)  FROM Ontario.RealEstateListingsAssociations rla)
                     AND rl2.ListingType = 'Rental'
                     GROUP BY rl2.CityName '''
   cursor.execute(query_rent_price)
@@ -53,12 +53,12 @@ def city_avg_price_calculator():
       # logging.error(e)
   # # Real Estate price not rentals
   # query_rl_price = '''SELECT rl2.CityName, ROUND(AVG(rla2.Price), 0) AS Price
-  #                     FROM Ontario.RemaxListingsAssociations rla2 
-  #                     INNER JOIN Ontario.RemaxListings rl2 ON rl2.Id = rla2.Id
+  #                     FROM Ontario.RealEstateListingsAssociations rla2 
+  #                     INNER JOIN Ontario.RealEstateListings rl2 ON rl2.Id = rla2.Id
   #                     INNER JOIN Ontario.CitiesData cd ON rl2.CityName = cd.CityName
   #                     WHERE rl2.Beds <= 15
   #                     AND rl2.Baths <= 10
-  #                     AND rla2.`timestamp` = (SELECT MAX(rla.`timestamp`)  FROM Ontario.RemaxListingsAssociations rla)
+  #                     AND rla2.`timestamp` = (SELECT MAX(rla.`timestamp`)  FROM Ontario.RealEstateListingsAssociations rla)
   #                     AND rl2.ListingType != 'Rental'
   #                     GROUP BY rl2.CityName '''
   # cursor.execute(query_rl_price)

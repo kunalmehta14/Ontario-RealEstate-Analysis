@@ -1,13 +1,3 @@
-version: '3.3'
-
-networks:
-  containerNetwork:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.50.60.0/29
-
 services:
 # Ontario Scraper App Configuration
   ontario-spider:
@@ -16,11 +6,13 @@ services:
     image: ghcr.io/kunalmehta14/realestate-datapipeline:1
     volumes:
       - ./ontario-spider/app:/opt/app
-      - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
-    networks:
-      containerNetwork:
-        ipv4_address: 10.50.60.3
-    privileged: true
+      - type: volume
+        source: scrapy_images
+        target: /opt/app/spiders/Images
+    environment:
+      - CIFS_USERNAME=${CIFS_USERNAME}
+      - CIFS_PASSWORD=${CIFS_PASSWORD}
+
 # British Columbia Scraper App Configuration
   britishcolumbia-spider:
     restart: always
@@ -28,11 +20,12 @@ services:
     image: ghcr.io/kunalmehta14/realestate-datapipeline:1
     volumes:
       - ./britishcolumbia-spider/app:/opt/app
-      - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
-    networks:
-      containerNetwork:
-        ipv4_address: 10.50.60.4
-    privileged: true
+      - type: volume
+        source: scrapy_images
+        target: /opt/app/spiders/Images
+    environment:
+      - CIFS_USERNAME=${CIFS_USERNAME}
+      - CIFS_PASSWORD=${CIFS_PASSWORD}
 # Alberta Scraper App Configuration
   alberta-spider:
     restart: always
@@ -40,11 +33,12 @@ services:
     image: ghcr.io/kunalmehta14/realestate-datapipeline:1
     volumes:
       - ./alberta-spider/app:/opt/app
-      - /opt/scrapy-images/images-db1:/opt/app/spiders/Images
-    networks:
-      containerNetwork:
-        ipv4_address: 10.50.60.5
-    privileged: true
+      - type: volume
+        source: scrapy_images
+        target: /opt/app/spiders/Images
+    environment:
+      - CIFS_USERNAME=${CIFS_USERNAME}
+      - CIFS_PASSWORD=${CIFS_PASSWORD}
 
 # Monitoring Services
   node-exporter:
@@ -64,3 +58,11 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     ports:
       - "8080:8080"
+
+# Shared Folder
+volumes:
+  scrapy_images:
+    driver_opts:
+      type: cifs
+      o: username=${CIFS_USERNAME},password=${CIFS_PASSWORD},file_mode=0777,dir_mode=0777
+      device: ${CIFS_SHARE}
