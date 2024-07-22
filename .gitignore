@@ -6,6 +6,7 @@ pyvenv.cfg
 # env files
 .env
 environment.env
+git-token
 # Mysql Directory for
 # devlopment purposes
 mysqlapp/
