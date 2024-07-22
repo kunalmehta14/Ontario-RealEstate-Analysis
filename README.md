@@ -5,13 +5,6 @@
 > The project leverages web scraping techniques, Docker Compose for container orchestration, MySQL for data storage, and Jenkins for continuous integration andcontinuous deployment (CI/CD)
 
 ### Features
-+ #### Data Collection
-> A Python worker powered by Scrapy is used to scrape data from the following sources, 
-> + [Zillow](https://zillow.ca/ 'Zillow Canada')
-> + [Remax](https://www.remax.ca/ 'Remax Canada')
-> + [Airbnb](https://airbnb.ca/ 'Airbnb Canada')
-> + [Ontario](https://www.ontario.ca/page/government-ontario 'Government of Ontario')
-> + [Wikipedia](https://en.wikipedia.org/wiki/Main_Page 'Wikipedia')
 
 + #### Dockerized Environment
 > Docker Compose is utilized to automate the setup of the scraper worker and MySQL database containers. This ensures a consistent and portable development and deployment environment.
@@ -28,9 +21,6 @@
 > + The services has been distributed across VMs and docker container for easier scalability and isolation.
 > + Jenkins on a dedicated VM to manage the CI/CD pipeline. Jenkins can automatically build and deploy your application updates to the production server, triggered by changes in the project's repository.
 > +  Implement monitoring and logging solutions to track the health and performance of your application. Tools like Prometheus and Grafana to help collect and visualize metrics from Docker containers.
-
-##### Crawler Architecture:
-![System Architecture](datacrawler_architecture.svg)
 
 ### Setting up the Ontario Real Estate Data Pipeline
 > Follow the steps below to setup the Docker container environment:
