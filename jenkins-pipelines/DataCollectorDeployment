@@ -17,22 +17,9 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sshagent(['data_collector_ssh']) {
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "git init C:\Docker_Services\realestate_datapipeline"'
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "git config --global --add safe.directory C:\Docker_Services\realestate_datapipeline"'
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "git -C C:\Docker_Services\realestate_datapipeline pull https://github.com/kunalmehta14/Ontario-RealEstate-Analysis.git"'
-                    }
-                }
-            }
-        }
-        stage('Copy Environmental Variables SMB'){
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    withCredentials([file(credentialsId: 'smb_env', variable: 'smb_env'),
-                                file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
-                        sshagent(['data_collector_ssh']) {
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $smb_env jenkins@$DATA_COLLECTOR_IP:C:\Docker_Services\realestate_datapipeline'
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:C:\Docker_Services\realestate_datapipeline'
-                        }
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "git init /opt/appdir"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "git config --global --add safe.directory /opt/appdir"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "git -C /opt/appdir pull https://github.com/kunalmehta14/Ontario-RealEstate-Analysis.git"'
                     }
                 }
             }
@@ -43,8 +30,8 @@ pipeline {
                     withCredentials([file(credentialsId: 'on_data_collector_env', variable: 'on_data_collector_env'),
                                 file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
                         sshagent(['data_collector_ssh']) {
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $on_data_collector_env jenkins@$DATA_COLLECTOR_IP:C:\Docker_Services\realestate_datapipeline\ontario-spider\app'
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:C:\Docker_Services\realestate_datapipeline'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $on_data_collector_env jenkins@$DATA_COLLECTOR_IP:/opt/appdir/ontario-spider/app'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir'
                         }
                     }
                 }
@@ -56,8 +43,8 @@ pipeline {
                     withCredentials([file(credentialsId: 'bc_data_collector_env', variable: 'bc_data_collector_env'),
                                 file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
                         sshagent(['data_collector_ssh']) {
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $bc_data_collector_env jenkins@$DATA_COLLECTOR_IP:C:\Docker_Services\realestate_datapipeline\britishcolumbia-spider\app'
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:C:\Docker_Services\realestate_datapipeline'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $bc_data_collector_env jenkins@$DATA_COLLECTOR_IP:/opt/appdir/britishcolumbia-spider/app'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir'
                         }
                     }
                 }
@@ -69,8 +56,8 @@ pipeline {
                     withCredentials([file(credentialsId: 'ab_data_collector_env', variable: 'ab_data_collector_env'),
                                 file(credentialsId: 'data_collector_docker_env', variable: 'DATA_COLLECTOR_DOCKER_ENV')]) {
                         sshagent(['data_collector_ssh']) {
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $ab_data_collector_env jenkins@$DATA_COLLECTOR_IP:C:\Docker_Services\realestate_datapipeline\alberta-spider\app'
-                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:C:\Docker_Services\realestate_datapipeline'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $ab_data_collector_env jenkins@$DATA_COLLECTOR_IP:/opt/appdir/alberta-spider/app'
+                            sh 'scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r $DATA_COLLECTOR_DOCKER_ENV jenkins@$DATA_COLLECTOR_IP:/opt/appdir'
                         }
                     }
                 }
@@ -100,7 +87,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sshagent(['data_collector_ssh']) {
-                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker compose -f C:\Docker_Services\realestate_datapipeline\docker-compose.yaml up -d --no-deps --build --always-recreate-deps"'
+                        sh 'ssh -o StrictHostKeyChecking=no -l jenkins $DATA_COLLECTOR_IP "docker compose -f /opt/appdir/docker-compose.yaml up -d --no-deps --build --always-recreate-deps"'
                     }
                 }
                 
