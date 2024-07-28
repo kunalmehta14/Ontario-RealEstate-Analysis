@@ -10,7 +10,6 @@ from twisted.internet import reactor, defer
 from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
 import warnings, os
-import mysql.connector
 from dotenv import find_dotenv, load_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
