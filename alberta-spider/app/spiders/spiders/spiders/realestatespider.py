@@ -161,7 +161,7 @@ class RealEstateMetaSpider(scrapy.Spider):
     if 'mlsNum' in updated_data:
       mlsnum = updated_data['mlsNum']
     # Website and Region settings
-    website = 'remaxca'
+    website = 'realestateca'
     province = 'ab'
     # Listing Images
     images = []
